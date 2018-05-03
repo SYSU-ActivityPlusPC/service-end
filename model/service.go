@@ -35,14 +35,14 @@ func AddActivity(activityInfo types.ActivityInfo) error {
 		Poster:          activityInfo.Poster,
 		Qrcode:          activityInfo.Qrcode,
 		Email:           activityInfo.Email,
-		Verified:        activityInfo.Verified,
+		Verified:        0,
 	}
 	affected, err := Engine.InsertOne(&activity)
 	if err != nil {
 		return err
 	}
 	if affected == 0 {
-		return errors.New("Failed to insert a new one, perhaps it has existed.")
+		return errors.New("Failed to insert a new one, perhaps it has existed")
 	}
 	return nil
 }

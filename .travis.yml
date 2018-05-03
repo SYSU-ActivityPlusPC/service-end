@@ -1,0 +1,34 @@
+sudo: required
+services:
+  - docker
+
+language: go
+go:
+  - "1.9"
+go_import_path: github.com/sysu-saad-project/service-end
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.21.0
+
+before_install:
+# Install docker-compose
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+# Create docker network
+  - docker network create activity
+  - docker network create dev
+
+# Test step
+script:
+# Compile code
+  - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+# Build image locally
+  - docker build -t txzdream/activityplus-service-pc:dev .
+  - go test ./...
+
+after_success:
+# Push to docker registry
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+  - docker push txzdream/activityplus-service-pc:dev

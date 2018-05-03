@@ -20,5 +20,4 @@ type ActivityInfo struct {
 	Poster          string `json:"poster"`
 	Qrcode          string `json:"qrcode"`
 	Email           string `json:"email"`
-	Verified        int    `json:"verified"`
 }
