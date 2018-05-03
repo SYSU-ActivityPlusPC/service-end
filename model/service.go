@@ -9,18 +9,25 @@ import (
 
 // AddActivity insert a activity into the db
 func AddActivity(activityInfo types.ActivityInfo) error {
+	starttime, err := time.Parse("2006-01-01", activityInfo.StartTime)
+	endtime, err := time.Parse("2006-01-01", activityInfo.EndTime)
+	pubstarttime, err := time.Parse("2006-01-01", activityInfo.PubStartTime)
+	pubendtime, err := time.Parse("2006-01-01", activityInfo.PubEndTime)
+	if err != nil {
+		return err
+	}
 	activity := ActivityInfo{
 		ID:              activityInfo.ID,
 		Name:            activityInfo.Name,
-		StartTime:       msToTime(activityInfo.StartTime),
-		EndTime:         msToTime(activityInfo.EndTime),
+		StartTime:       &starttime,
+		EndTime:         &endtime,
 		Campus:          activityInfo.Campus,
 		Location:        activityInfo.Location,
 		EnrollCondition: activityInfo.EnrollCondition,
 		Sponsor:         activityInfo.Sponsor,
 		Type:            activityInfo.Type,
-		PubStartTime:    msToTime(activityInfo.PubStartTime),
-		PubEndTime:      msToTime(activityInfo.PubEndTime),
+		PubStartTime:    &pubstarttime,
+		PubEndTime:      &pubendtime,
 		Detail:          activityInfo.Detail,
 		Reward:          activityInfo.Reward,
 		Introduction:    activityInfo.Introduction,
