@@ -9,7 +9,6 @@ import (
 
 // AddActivity insert a activity into the db
 func AddActivity(activityInfo types.ActivityInfo) error {
-
 	activity := ActivityInfo{
 		ID:              activityInfo.ID,
 		Name:            activityInfo.Name,
@@ -31,7 +30,7 @@ func AddActivity(activityInfo types.ActivityInfo) error {
 		Email:           activityInfo.Email,
 		Verified:        activityInfo.Verified,
 	}
-	affected, err := Engine.InsertOne(activity)
+	affected, err := Engine.InsertOne(&activity)
 	if err != nil {
 		return err
 	}
