@@ -11,8 +11,13 @@ func GetServer() *negroni.Negroni{
 
 	s := negroni.Classic()
 
-	// TODO: Add handler here
-	r.HandleFunc("/act", controller.AddActivityHandler).Methods("POST")
+	act := r.PathPrefix("/act").Subrouter()
+	act.HandleFunc("", controller.AddActivityHandler).Methods("POST")
+	act.HandleFunc("/", controller.AddActivityHandler).Methods("POST")
+	act.HandleFunc("/{actId}", controller.ModifyActivityHandler).Methods("POST")
+	act.HandleFunc("/{actId}/", controller.DeleteActivityHandler).Methods("DELETE")
+	act.HandleFunc("/", controller.VerifyActivityHandler).Methods("PUT")
+	act.HandleFunc("", controller.VerifyActivityHandler).Methods("PUT")
 
 	s.UseHandler(r)
 	return s
