@@ -5,7 +5,7 @@ services:
 language: go
 go:
   - "1.9"
-go_import_path: github.com/sysu-saad-project/service-end
+go_import_path: github.com/sysu-activitypluspc/service-end
 
 env:
   - DOCKER_COMPOSE_VERSION=1.21.0
