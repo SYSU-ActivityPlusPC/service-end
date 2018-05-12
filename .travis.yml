@@ -25,10 +25,10 @@ script:
 # Compile code
   - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 # Build image locally
-  - docker build -t txzdream/activityplus-service-pc:dev .
+  - docker build -t txzdream/sysu-activityPlus-pc-service_end:dev .
   - go test ./...
 
 after_success:
 # Push to docker registry
   - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-  - docker push txzdream/activityplus-service-pc:dev
+  - docker push txzdream/sysu-activityPlus-pc-service_end:dev
