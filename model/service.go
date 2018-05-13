@@ -85,10 +85,12 @@ func DeleteActivity(id int) (int, error) {
 }
 
 func VerifyActivity(id int, status int) (int, error) {
-	activity := ActivityInfo{
-		Verified: status,
+	activity := new(ActivityInfo)
+	activity.Verified = status
+	affected, err := Engine.Id(id).Cols("verified").Update(activity)
+	if err != nil {
+		fmt.Println(err)
 	}
-	affected, _ := Engine.Id(id).Update(&activity)
 	if affected == 0 {
 		fmt.Println("Activity status does not need to be changed.")
 	}

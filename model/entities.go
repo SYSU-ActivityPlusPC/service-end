@@ -22,7 +22,7 @@ type ActivityInfo struct {
 	Poster          string `xorm:"varchar(64)"`
 	Qrcode          string `xorm:"varchar(64)"`
 	Email           string `xorm:"varchar(255)"`
-	Verified        int
+	Verified        int    `xorm:"int 'verified'"`
 }
 
 // TableName defines table name
