@@ -23,7 +23,7 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	jsonBody := new(types.ActivityInfo)
 	json.Unmarshal(body, jsonBody)
 	num, err := model.AddActivity(*jsonBody)
-	f num == 0 {
+	if num == 0 {
 		w.WriteHeader(204)
 		return
 	}
