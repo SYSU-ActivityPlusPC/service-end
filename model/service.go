@@ -1,20 +1,20 @@
 package model
 
 import (
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/sysu-activitypluspc/service-end/types"
 )
 
 // AddActivity insert a activity into the db
-func AddActivity(activityInfo types.ActivityInfo) error {
+func AddActivity(activityInfo types.ActivityInfo) (int, error) {
 	starttime, err := time.Parse("2006-01-01", activityInfo.StartTime)
 	endtime, err := time.Parse("2006-01-01", activityInfo.EndTime)
 	pubstarttime, err := time.Parse("2006-01-01", activityInfo.PubStartTime)
 	pubendtime, err := time.Parse("2006-01-01", activityInfo.PubEndTime)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	activity := ActivityInfo{
 		ID:              activityInfo.ID,
@@ -38,22 +38,16 @@ func AddActivity(activityInfo types.ActivityInfo) error {
 		Verified:        0,
 	}
 	affected, err := Engine.InsertOne(&activity)
-	if err != nil {
-		return err
-	}
-	if affected == 0 {
-		return errors.New("Failed to insert a new one, perhaps it has existed")
-	}
-	return nil
+	return int(affected), nil
 }
 
-func UpdateActivity(id int, activityInfo types.ActivityInfo) error{
+func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
 	starttime, err := time.Parse("2006-01-01", activityInfo.StartTime)
 	endtime, err := time.Parse("2006-01-01", activityInfo.EndTime)
 	pubstarttime, err := time.Parse("2006-01-01", activityInfo.PubStartTime)
 	pubendtime, err := time.Parse("2006-01-01", activityInfo.PubEndTime)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	activity := ActivityInfo{
 		Name:            activityInfo.Name,
@@ -75,35 +69,33 @@ func UpdateActivity(id int, activityInfo types.ActivityInfo) error{
 		Email:           activityInfo.Email,
 		Verified:        0,
 	}
-	Engine.Id(id).Update(&activity)
-	return nil
+	affected, err := Engine.Id(id).Update(&activity)
+	return int(affected), err
 }
 
-func DeleteActivity(id int) error {
+func DeleteActivity(id int) (int, error) {
 	affected, err := Engine.Id(id).Delete(&ActivityInfo{})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if affected == 0 {
-		return errors.New("Failed to delete an activity")
+		fmt.Println("Failed to delete an activity")
 	}
-	return nil
+	return int(affected), nil
 }
 
-func VerifyActivity(id int, status int)error {
+func VerifyActivity(id int, status int) (int, error) {
 	activity := ActivityInfo{
-		Verified:        status,
+		Verified: status,
 	}
-	affected, _:= Engine.Id(id).Update(&activity)
+	affected, _ := Engine.Id(id).Update(&activity)
 	if affected == 0 {
-		return errors.New("Activity status does not need to be changed.")
+		fmt.Println("Activity status does not need to be changed.")
 	}
-	return nil
+	return int(affected), nil
 }
 
 func msToTime(ms int64) *time.Time {
 	ret := time.Unix(0, ms*int64(time.Millisecond))
 	return &ret
 }
-
-

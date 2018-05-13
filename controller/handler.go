@@ -1,11 +1,12 @@
 package controller
 
 import (
-	"strconv"
-	"github.com/gorilla/mux"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 
 	"github.com/sysu-activitypluspc/service-end/model"
 	"github.com/sysu-activitypluspc/service-end/types"
@@ -21,7 +22,11 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonBody := new(types.ActivityInfo)
 	json.Unmarshal(body, jsonBody)
-	err = model.AddActivity(*jsonBody)
+	num, err := model.AddActivity(*jsonBody)
+	f num == 0 {
+		w.WriteHeader(204)
+		return
+	}
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -36,7 +41,7 @@ func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	intActId, err := strconv.Atoi(actid)
-	if err != nil || intActId <= 0{
+	if err != nil || intActId <= 0 {
 		w.WriteHeader(400)
 		return
 	}
@@ -50,7 +55,11 @@ func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonBody := new(types.ActivityInfo)
 	json.Unmarshal(body, jsonBody)
-	err = model.UpdateActivity(intActId, *jsonBody)
+	num, err := model.UpdateActivity(intActId, *jsonBody)
+	if num == 0 {
+		w.WriteHeader(204)
+		return
+	}
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -65,12 +74,16 @@ func DeleteActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	intActId, err := strconv.Atoi(actid)
-	if err != nil || intActId <= 0{
+	if err != nil || intActId <= 0 {
 		w.WriteHeader(400)
 		return
 	}
-	
-	err = model.DeleteActivity(intActId)
+
+	num, err := model.DeleteActivity(intActId)
+	if num == 0 {
+		w.WriteHeader(204)
+		return
+	}
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -82,7 +95,7 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	actid := r.FormValue("act")
 	verified := r.FormValue("verify")
-	if len(actid) * len(verified) == 0 {
+	if len(actid)*len(verified) == 0 {
 		w.WriteHeader(400)
 		return
 	}
@@ -93,7 +106,11 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = model.VerifyActivity(intActId, intVerify)
+	num, err := model.VerifyActivity(intActId, intVerify)
+	if num == 0 {
+		w.WriteHeader(204)
+		return
+	}
 	if err != nil {
 		w.WriteHeader(500)
 		return
