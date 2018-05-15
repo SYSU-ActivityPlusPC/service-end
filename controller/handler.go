@@ -131,8 +131,21 @@ func ShowActivitiesListHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		pageNumber = "1"
 	}
+	var verified string
+	if len(r.Form["verify"]) > 0 {
+		verified = r.Form["verify"][0]
+	} else {
+		w.WriteHeader(400)
+		return
+	}
 	intPageNum, err := strconv.Atoi(pageNumber)
 	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+		w.WriteHeader(400)
+		return
+	}
+	intVerified, err := strconv.Atoi(verified)
+	if err != nil || (intVerified != 0 && intVerified != 1) {
 		fmt.Fprint(os.Stderr, err)
 		w.WriteHeader(400)
 		return
@@ -141,23 +154,23 @@ func ShowActivitiesListHandler(w http.ResponseWriter, r *http.Request) {
 	// Judge if the passed param is valid
 	if intPageNum > 0 {
 		// Get activity list
-		activityList := model.GetActivityList(intPageNum - 1)
+		activityList := model.GetActivityList(intPageNum-1, intVerified)
 
 		// Change each element to the format that we need
 		infoArr := make([]types.ActivityIntroduction, 0)
 		for i := 0; i < len(activityList); i++ {
 			tmp := types.ActivityIntroduction{
-				ID:        activityList[i].ID,
-				Name:      activityList[i].Name,
-				StartTime: activityList[i].StartTime.UnixNano() / int64(time.Millisecond),
-				EndTime:   activityList[i].EndTime.UnixNano() / int64(time.Millisecond),
-				Campus:    activityList[i].Campus,
-				Type:      activityList[i].Type,
-				Poster:    activityList[i].Poster,
-				Location:  activityList[i].Location,
-				Verified:  activityList[i].Verified,
+				ID:              activityList[i].ID,
+				Name:            activityList[i].Name,
+				StartTime:       activityList[i].StartTime.UnixNano() / int64(time.Millisecond),
+				EndTime:         activityList[i].EndTime.UnixNano() / int64(time.Millisecond),
+				Campus:          activityList[i].Campus,
+				EnrollCondition: activityList[i].EnrollCondition,
+				Sponsor:         activityList[i].Sponsor,
+				PubStartTime:    activityList[i].PubStartTime.UnixNano() / int64(time.Millisecond),
+				PubEndTime:      activityList[i].PubEndTime.UnixNano() / int64(time.Millisecond),
+				Verified:        activityList[i].Verified,
 			}
-			tmp.Poster = GetPoster(tmp.Poster, tmp.Type)
 			infoArr = append(infoArr, tmp)
 		}
 		returnList := types.ActivityList{

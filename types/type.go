@@ -47,15 +47,16 @@ type IntActivityInfo struct {
 
 // ActivityIntroduction include required information in activity list page
 type ActivityIntroduction struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	StartTime int64  `json:"startTime"`
-	EndTime   int64  `json:"endTime"`
-	Campus    int    `json:"campus"`
-	Type      int    `json:"type"`
-	Poster    string `json:"poster"`
-	Location  string `json:"location"`
-	Verified  int    `json:"verified"`
+	ID              int    `json:"id"`
+	Name            string `json:"name"`
+	StartTime       int64  `json:"startTime"`
+	EndTime         int64  `json:"endTime"`
+	Campus          int    `json:"campus"`
+	EnrollCondition string `json:"enrollCondition"`
+	Sponsor         string `json:"sponsor"`
+	PubStartTime    int64  `json:"pubStartTime"`
+	PubEndTime      int64  `json:"pubEndTime"`
+	Verified        int    `json:"verified"`
 }
 
 // ActivityList defines the return format

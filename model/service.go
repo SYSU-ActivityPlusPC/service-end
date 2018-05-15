@@ -102,13 +102,13 @@ func msToTime(ms int64) *time.Time {
 }
 
 // GetActivityList return wanted activity list with given page number
-func GetActivityList(pageNum int) []ActivityInfo {
+func GetActivityList(pageNum int, verified int) []ActivityInfo {
 	activityList := make([]ActivityInfo, 0)
 	// Search verified activity
 	// 0 stands for no pass
 	// 1 stands for pass
 	// 2 stands for not yet verified
-	Engine.Desc("id").Limit(10, pageNum*10).Find(&activityList)
+	Engine.Desc("id").Limit(10, pageNum*10).Where("verified = ?", verified).Find(&activityList)
 	return activityList
 }
 
