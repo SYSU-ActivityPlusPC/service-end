@@ -8,7 +8,7 @@ import (
 )
 
 // AddActivity insert a activity into the db
-func AddActivity(activityInfo types.ActivityInfo) (int, error) {
+func AddActivity(activityInfo types.StringActivityInfo) (int, error) {
 	starttime, err := time.Parse("2006-01-01", activityInfo.StartTime)
 	endtime, err := time.Parse("2006-01-01", activityInfo.EndTime)
 	pubstarttime, err := time.Parse("2006-01-01", activityInfo.PubStartTime)
@@ -41,7 +41,7 @@ func AddActivity(activityInfo types.ActivityInfo) (int, error) {
 	return int(affected), nil
 }
 
-func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
+func UpdateActivity(id int, activityInfo types.StringActivityInfo) (int, error) {
 	starttime, err := time.Parse("2006-01-01", activityInfo.StartTime)
 	endtime, err := time.Parse("2006-01-01", activityInfo.EndTime)
 	pubstarttime, err := time.Parse("2006-01-01", activityInfo.PubStartTime)
@@ -67,7 +67,6 @@ func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
 		Poster:          activityInfo.Poster,
 		Qrcode:          activityInfo.Qrcode,
 		Email:           activityInfo.Email,
-		Verified:        0,
 	}
 	affected, err := Engine.Id(id).Update(&activity)
 	return int(affected), err
@@ -100,4 +99,23 @@ func VerifyActivity(id int, status int) (int, error) {
 func msToTime(ms int64) *time.Time {
 	ret := time.Unix(0, ms*int64(time.Millisecond))
 	return &ret
+}
+
+// GetActivityList return wanted activity list with given page number
+func GetActivityList(pageNum int) []ActivityInfo {
+	activityList := make([]ActivityInfo, 0)
+	// Search verified activity
+	// 0 stands for no pass
+	// 1 stands for pass
+	// 2 stands for not yet verified
+	Engine.Desc("id").Limit(10, pageNum*10).Find(&activityList)
+	return activityList
+}
+
+// GetActivityInfo return wanted activity detail information which is given by id
+func GetActivityInfo(id int) (bool, ActivityInfo) {
+	var activity ActivityInfo
+
+	ok, _ := Engine.ID(id).Get(&activity)
+	return ok, activity
 }
