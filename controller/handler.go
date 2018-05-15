@@ -15,6 +15,7 @@ import (
 	"github.com/sysu-activitypluspc/service-end/types"
 )
 
+// AddActivityHandler add activity to the db
 func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
@@ -36,15 +37,15 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(200)
 }
-
+// ModifyActivityHandler change the message except id and verified
 func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 	actid := mux.Vars(r)["actId"]
 	if len(actid) <= 0 {
 		w.WriteHeader(400)
 		return
 	}
-	intActId, err := strconv.Atoi(actid)
-	if err != nil || intActId <= 0 {
+	intActID, err := strconv.Atoi(actid)
+	if err != nil || intActID <= 0 {
 		w.WriteHeader(400)
 		return
 	}
@@ -58,7 +59,7 @@ func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonBody := new(types.StringActivityInfo)
 	json.Unmarshal(body, jsonBody)
-	num, err := model.UpdateActivity(intActId, *jsonBody)
+	num, err := model.UpdateActivity(intActID, *jsonBody)
 	if num == 0 {
 		w.WriteHeader(204)
 		return
@@ -70,19 +71,20 @@ func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
+// DeleteActivityHandler remove activity with given id
 func DeleteActivityHandler(w http.ResponseWriter, r *http.Request) {
 	actid := mux.Vars(r)["actId"]
 	if len(actid) <= 0 {
 		w.WriteHeader(400)
 		return
 	}
-	intActId, err := strconv.Atoi(actid)
-	if err != nil || intActId <= 0 {
+	intActID, err := strconv.Atoi(actid)
+	if err != nil || intActID <= 0 {
 		w.WriteHeader(400)
 		return
 	}
 
-	num, err := model.DeleteActivity(intActId)
+	num, err := model.DeleteActivity(intActID)
 	if num == 0 {
 		w.WriteHeader(204)
 		return
@@ -94,6 +96,7 @@ func DeleteActivityHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
+// VerifyActivityHandler change the verify status of an activity
 func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	actid := r.FormValue("act")
@@ -102,14 +105,14 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	intActId, err := strconv.Atoi(actid)
+	intActID, err := strconv.Atoi(actid)
 	intVerify, err := strconv.Atoi(verified)
-	if err != nil || intActId <= 0 || (intVerify != 0 && intVerify != 1) {
+	if err != nil || intActID <= 0 || (intVerify != 0 && intVerify != 1) {
 		w.WriteHeader(400)
 		return
 	}
 
-	num, err := model.VerifyActivity(intActId, intVerify)
+	num, err := model.VerifyActivity(intActID, intVerify)
 	if num == 0 {
 		w.WriteHeader(204)
 		return
@@ -122,6 +125,7 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// ShowActivitiesListHandler display activity with given page number and verify status
 func ShowActivitiesListHandler(w http.ResponseWriter, r *http.Request) {
 	// Get required page number, if not given, use the default value 1
 	r.ParseForm()
