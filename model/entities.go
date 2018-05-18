@@ -27,7 +27,7 @@ type ActivityInfo struct {
 
 // PCUser stores pc user message
 type PCUser struct {
-	ID       int    `xorm:"pk authincr 'id'"`
+	ID       int    `xorm:"pk autoincr 'id'"`
 	Name     string `xorm:"varchar(45) notnull"`
 	Email    string `xorm:"varchar(255) notnull"`
 	Logo     string `xorm:"varchar(70) notnull"`
