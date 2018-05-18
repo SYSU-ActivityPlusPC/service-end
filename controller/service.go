@@ -67,9 +67,8 @@ func CheckToken(tokenString string) (int, string) {
 			return 1, openID.(string)
 		}
 		return 2, openID.(string)
-	} else {
-		return 0, ""
 	}
+	return 0, ""
 }
 
 // GenerateJWT Generate jwt with openid(sub), issuance time(iat) and expiration time(exp)
@@ -108,4 +107,8 @@ func GetFileMd5(f io.Reader) string {
 	}
 	ret := h.Sum(nil)
 	return fmt.Sprintf("%x", ret)
+}
+
+func CheckIsAdmin(username string) bool{
+	return false
 }
