@@ -30,11 +30,7 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonBody := new(types.StringActivityInfo)
 	json.Unmarshal(body, jsonBody)
-	num, err := model.AddActivity(*jsonBody)
-	if num == 0 {
-		w.WriteHeader(204)
-		return
-	}
+	_, err = model.AddActivity(*jsonBody)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -64,11 +60,7 @@ func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonBody := new(types.StringActivityInfo)
 	json.Unmarshal(body, jsonBody)
-	num, err := model.UpdateActivity(intActID, *jsonBody)
-	if num == 0 {
-		w.WriteHeader(204)
-		return
-	}
+	_, err = model.UpdateActivity(intActID, *jsonBody)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -89,11 +81,7 @@ func DeleteActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	num, err := model.DeleteActivity(intActID)
-	if num == 0 {
-		w.WriteHeader(204)
-		return
-	}
+	_, err = model.DeleteActivity(intActID)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -117,11 +105,7 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	num, err := model.VerifyActivity(intActID, intVerify)
-	if num == 0 {
-		w.WriteHeader(204)
-		return
-	}
+	_, err = model.VerifyActivity(intActID, intVerify)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -319,7 +303,10 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonBody := new(types.PCUserSignInfo)
-	json.Unmarshal(body, jsonBody)
+	err = json.Unmarshal(body, jsonBody)
+	if err != nil {
+		w.WriteHeader(400)
+	}
 	ok := model.AddUser(*jsonBody)
 	if ok {
 		w.WriteHeader(200)

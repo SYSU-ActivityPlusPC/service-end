@@ -108,8 +108,15 @@ func GetActivityList(pageNum int, verified int) []ActivityInfo {
 	// 0 stands for no pass
 	// 1 stands for pass
 	// 2 stands for not yet verified
-	Engine.Desc("id").Limit(10, pageNum*10).Where("verified = ?", verified).Find(&activityList)
-	return activityList
+	Engine.Desc("id").Where("verified = ?", verified).Find(&activityList)
+	from := pageNum * 10
+	if from >= len(activityList) {
+		return []ActivityInfo{}
+	}
+	if from+10 > len(activityList) {
+		return activityList[from:]
+	}
+	return activityList[from : from+10]
 }
 
 // GetActivityInfo return wanted activity detail information which is given by id
@@ -139,17 +146,17 @@ func GetUserInfo(username string) PCUser {
 
 // AddUser add user
 func AddUser(user types.PCUserSignInfo) bool {
-	dbuser := PCUser {
-		Name: user.Name,
-		Email: user.Email,
-		Logo: user.Logo,
+	dbuser := PCUser{
+		Name:     user.Name,
+		Email:    user.Email,
+		Logo:     user.Logo,
 		Evidence: user.Evidence,
-		Info: user.Info,
+		Info:     user.Info,
 	}
-	affected, err := Engine.InsertOne(&dbuser)
+	_, err := Engine.InsertOne(&dbuser)
 	if err != nil {
 		fmt.Println(err)
 		return false
 	}
-	return affected > 0
+	return true
 }

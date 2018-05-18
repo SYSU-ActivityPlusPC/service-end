@@ -46,7 +46,7 @@ func GetPoster(raw string, actType int) string {
 // status code: 0 -> check error; 1 -> timeout; 2 -> ok
 func CheckToken(tokenString string) (int, string) {
 	var hmacSampleSecret = []byte(secret)
-	token, _ := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -55,6 +55,9 @@ func CheckToken(tokenString string) (int, string) {
 		// hmacSampleSecret is a []byte containing my secret
 		return hmacSampleSecret, nil
 	})
+	if err != nil {
+		return 0, ""
+	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		expTime := claims["exp"]
