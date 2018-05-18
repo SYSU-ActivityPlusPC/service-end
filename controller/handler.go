@@ -264,7 +264,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		if ok == 2 {
 			// Check if the user exist
 			user := model.GetUserInfo(name)
-			if user.ID > 0 {
+			if user.ID >= 0 {
 				res := types.PCUserInfo{
 					ID:    user.ID,
 					Name:  user.Name,
@@ -288,7 +288,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	jsonBody := new(types.PCUserRequest)
 	err = json.Unmarshal(body, &jsonBody)
 	user := model.GetUserInfo(jsonBody.Account)
-	if user.ID <= 0 {
+	if user.ID < 0 {
 		w.WriteHeader(400)
 		return
 	}
