@@ -340,7 +340,7 @@ func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
 	staticFilePosition := os.Getenv("STATIC_DIR")
 	md5Filename := GetFileMd5(file)
 	ext := path.Ext(handler.Filename)
-	filename := strings.Join([]string{md5Filename, ext}, ".")
+	filename := strings.Join([]string{md5Filename, ext}, "")
 	// Check if the file exists
 	if _, err = os.Stat(filepath.Join(staticFilePosition, filename)); os.IsNotExist(err) {
 		// Create file and write to file
