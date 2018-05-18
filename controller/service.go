@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"io"
 	"crypto/md5"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -70,12 +70,12 @@ func CheckToken(tokenString string) (int, string) {
 }
 
 // GenerateJWT Generate jwt with openid(sub), issuance time(iat) and expiration time(exp)
-func GenerateJWT(openId string) (string, error) {
+func GenerateJWT(account string) (string, error) {
 	// expire in two weeks
 	var exp = time.Hour * 24 * 14
 	var hmacSampleSecret = []byte(secret)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": openId,
+		"sub": account,
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(exp).Unix(),
 	})
@@ -93,16 +93,16 @@ func getPassword(id string, raw string) string {
 // GetMd5 return md5 of given content
 func GetMd5(content []byte) string {
 	ret := md5.Sum(content)
-	return string(ret[:])
+	return fmt.Sprintf("%x", ret)
 }
 
 // GetFileMd5 get md5 of file
-func GetFileMd5(f io.Reader) string{
+func GetFileMd5(f io.Reader) string {
 	h := md5.New()
 	if _, err := io.Copy(h, f); err != nil {
 		fmt.Println(err)
 		return ""
 	}
 	ret := h.Sum(nil)
-	return string(ret[:])
+	return fmt.Sprintf("%x", ret)
 }

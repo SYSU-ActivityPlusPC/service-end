@@ -1,16 +1,16 @@
 package controller
 
 import (
-	"io"
-	"strings"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -259,12 +259,12 @@ func ShowActivityDetailHandler(w http.ResponseWriter, r *http.Request) {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Read header
 	auth := r.Header.Get("Authorization")
-	if len(auth) == 0 {
+	if len(auth) != 0 {
 		ok, name := CheckToken(auth)
 		if ok == 2 {
 			// Check if the user exist
 			user := model.GetUserInfo(name)
-			if user.ID != -1 {
+			if user.ID > 0 {
 				res := types.PCUserInfo{
 					ID:    user.ID,
 					Name:  user.Name,
@@ -286,24 +286,28 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonBody := new(types.PCUserRequest)
-	json.Unmarshal(body, jsonBody)
+	err = json.Unmarshal(body, &jsonBody)
 	user := model.GetUserInfo(jsonBody.Account)
-	if user.ID == -1 {
+	if user.ID <= 0 {
 		w.WriteHeader(400)
 		return
 	}
 	stringID := strconv.Itoa(user.ID)
 	password := getPassword(stringID, jsonBody.Password)
 	if password == user.Password {
+		// Generate token
+		token, _ := GenerateJWT(user.Account)
 		res := types.PCUserInfo{
 			ID:    user.ID,
 			Name:  user.Name,
 			Logo:  user.Logo,
-			Token: auth,
+			Token: token,
 		}
 		stringRes, _ := json.Marshal(res)
 		w.Write(stringRes)
+		return
 	}
+	w.WriteHeader(400)
 }
 
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
@@ -351,7 +355,7 @@ func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	fileInfo := types.FileInfo {
+	fileInfo := types.FileInfo{
 		Filename: filename,
 	}
 	resBody, _ := json.Marshal(fileInfo)
