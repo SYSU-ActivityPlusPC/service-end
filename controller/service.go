@@ -58,12 +58,12 @@ func CheckToken(tokenString string) (int, string) {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		expTime := claims["exp"]
-		openId := claims["sub"]
+		openID := claims["sub"]
 
 		if (int64)(expTime.(float64)) <= time.Now().Unix() {
-			return 1, openId.(string)
+			return 1, openID.(string)
 		}
-		return 2, openId.(string)
+		return 2, openID.(string)
 	} else {
 		return 0, ""
 	}
