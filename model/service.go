@@ -38,9 +38,7 @@ func AddActivity(activityInfo types.StringActivityInfo) (int, error) {
 		Email:           activityInfo.Email,
 		Verified:        0,
 	}
-	if len()
 	affected, err := Engine.InsertOne(&activity)
-	fmt.Println(affected)
 	return int(affected), nil
 }
 
