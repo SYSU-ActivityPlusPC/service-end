@@ -1,11 +1,15 @@
 package controller
 
 import (
+	"io"
+	"strings"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -37,6 +41,7 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(200)
 }
+
 // ModifyActivityHandler change the message except id and verified
 func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 	actid := mux.Vars(r)["actId"]
@@ -249,4 +254,106 @@ func ShowActivityDetailHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(400)
 	}
+}
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	// Read header
+	auth := r.Header.Get("Authorization")
+	if len(auth) == 0 {
+		ok, name := CheckToken(auth)
+		if ok == 2 {
+			// Check if the user exist
+			user := model.GetUserInfo(name)
+			if user.ID != -1 {
+				res := types.PCUserInfo{
+					ID:    user.ID,
+					Name:  user.Name,
+					Logo:  user.Logo,
+					Token: auth,
+				}
+				stringRes, _ := json.Marshal(res)
+				w.Write(stringRes)
+				return
+			}
+		}
+	}
+	// Check user account and password
+	r.ParseForm()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+
+	jsonBody := new(types.PCUserRequest)
+	json.Unmarshal(body, jsonBody)
+	user := model.GetUserInfo(jsonBody.Account)
+	if user.ID == -1 {
+		w.WriteHeader(400)
+		return
+	}
+	stringID := strconv.Itoa(user.ID)
+	password := getPassword(stringID, jsonBody.Password)
+	if password == user.Password {
+		res := types.PCUserInfo{
+			ID:    user.ID,
+			Name:  user.Name,
+			Logo:  user.Logo,
+			Token: auth,
+		}
+		stringRes, _ := json.Marshal(res)
+		w.Write(stringRes)
+	}
+}
+
+func SignUpHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+
+	jsonBody := new(types.PCUserSignInfo)
+	json.Unmarshal(body, jsonBody)
+	ok := model.AddUser(*jsonBody)
+	if ok {
+		w.WriteHeader(200)
+		return
+	}
+	w.WriteHeader(400)
+}
+
+func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
+	var maxMemory int64 = 5 * (1 << 20)
+	r.ParseMultipartForm(maxMemory)
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(400)
+	}
+	defer file.Close()
+	staticFilePosition := os.Getenv("STATIC_DIR")
+	md5Filename := GetFileMd5(file)
+	ext := path.Ext(handler.Filename)
+	filename := strings.Join([]string{md5Filename, ext}, ".")
+	// Check if the file exists
+	if _, err = os.Stat(filepath.Join(staticFilePosition, filename)); os.IsNotExist(err) {
+		// Create file and write to file
+		f, err := os.Create(filepath.Join(staticFilePosition, filename))
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(500)
+		}
+		defer f.Close()
+		if _, err = io.Copy(f, file); err != nil {
+			w.WriteHeader(500)
+			return
+		}
+	}
+	fileInfo := types.FileInfo {
+		Filename: filename,
+	}
+	resBody, _ := json.Marshal(fileInfo)
+	w.Write(resBody)
 }

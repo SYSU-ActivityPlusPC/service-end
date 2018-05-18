@@ -63,3 +63,31 @@ type ActivityIntroduction struct {
 type ActivityList struct {
 	Content []ActivityIntroduction `json:"content"`
 }
+
+// PCUserInfo include required login response
+type PCUserInfo struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Logo  string `json:"logo"`
+	Token string `json:"token"`
+}
+
+// PCUserRequest include user login message
+type PCUserRequest struct {
+	Account  string `json:"account"`
+	Password string `json:"password"`
+}
+
+// PCUserSignInfo include sign up message
+type PCUserSignInfo struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Logo     string `json:"logo"`
+	Evidence string `json:"evidence"`
+	Info     string `json:"info"`
+}
+
+// FileInfo include filename of the file
+type FileInfo struct {
+	Filename string `json:"filename"`
+}

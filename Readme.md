@@ -13,4 +13,21 @@
 - router/
 
   路由函数的存放地址
-  
+
+## 环境变量
+
+- STATIC_DIR
+
+  静态文件夹位置
+
+- PORT
+
+  端口号
+
+- DATABASE_ADDRESS
+
+  数据库地址
+
+- DATABASE_PORT
+
+  数据库端口

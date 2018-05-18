@@ -119,3 +119,37 @@ func GetActivityInfo(id int) (bool, ActivityInfo) {
 	ok, _ := Engine.ID(id).Get(&activity)
 	return ok, activity
 }
+
+// CheckPCUser check if the account exists
+func CheckPCUser(username string) bool {
+	has, _ := Engine.Where("account = ?", username).Exist(&PCUser{})
+	return has
+}
+
+// GetUserInfo returns user information with given username
+func GetUserInfo(username string) PCUser {
+	var user PCUser
+	err := Engine.Where("account = ?", username).Find(&user)
+	if err != nil {
+		fmt.Println(err)
+		user.ID = -1
+	}
+	return user
+}
+
+// AddUser add user
+func AddUser(user types.PCUserSignInfo) bool {
+	dbuser := PCUser {
+		Name: user.Name,
+		Email: user.Email,
+		Logo: user.Logo,
+		Evidence: user.Evidence,
+		Info: user.Info,
+	}
+	affected, err := Engine.InsertOne(&dbuser)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return affected > 0
+}
