@@ -9,10 +9,11 @@ import (
 
 // AddActivity insert a activity into the db
 func AddActivity(activityInfo types.StringActivityInfo) (int, error) {
-	starttime, err := time.Parse("2006-01-01", activityInfo.StartTime)
-	endtime, err := time.Parse("2006-01-01", activityInfo.EndTime)
-	pubstarttime, err := time.Parse("2006-01-01", activityInfo.PubStartTime)
-	pubendtime, err := time.Parse("2006-01-01", activityInfo.PubEndTime)
+	layout := "2006-01-02 15:04"
+	starttime, err := time.Parse(layout, activityInfo.StartTime)
+	endtime, err := time.Parse(layout, activityInfo.EndTime)
+	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)
+	pubendtime, err := time.Parse(layout, activityInfo.PubEndTime)
 	if err != nil {
 		return 0, err
 	}
@@ -37,15 +38,18 @@ func AddActivity(activityInfo types.StringActivityInfo) (int, error) {
 		Email:           activityInfo.Email,
 		Verified:        0,
 	}
+	if len()
 	affected, err := Engine.InsertOne(&activity)
+	fmt.Println(affected)
 	return int(affected), nil
 }
 
 func UpdateActivity(id int, activityInfo types.StringActivityInfo) (int, error) {
-	starttime, err := time.Parse("2006-01-01", activityInfo.StartTime)
-	endtime, err := time.Parse("2006-01-01", activityInfo.EndTime)
-	pubstarttime, err := time.Parse("2006-01-01", activityInfo.PubStartTime)
-	pubendtime, err := time.Parse("2006-01-01", activityInfo.PubEndTime)
+	layout := "2006-01-02 15:04:05"
+	starttime, err := time.Parse(layout, activityInfo.StartTime)
+	endtime, err := time.Parse(layout, activityInfo.EndTime)
+	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)
+	pubendtime, err := time.Parse(layout, activityInfo.PubEndTime)
 	if err != nil {
 		return 0, err
 	}

@@ -32,6 +32,7 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(body, jsonBody)
 	_, err = model.AddActivity(*jsonBody)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(500)
 		return
 	}
