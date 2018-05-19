@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gorilla/mux"
 	"github.com/sysu-activitypluspc/service-end/controller"
+	"github.com/sysu-activitypluspc/service-end/middleware"
 	"github.com/urfave/negroni"
 )
 
@@ -10,6 +11,8 @@ func GetServer() *negroni.Negroni {
 	r := mux.NewRouter()
 
 	s := negroni.Classic()
+	s.Use(middleware.ValidUserMiddleWare{})
+	
 
 	act := r.PathPrefix("/act").Subrouter()
 	act.HandleFunc("", controller.AddActivityHandler).Methods("POST")

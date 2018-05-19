@@ -1,8 +1,9 @@
-package controller
+package middleware
 
 import (
 	"net/http"
 
+	"github.com/sysu-activitypluspc/service-end/controller"
 	"github.com/sysu-activitypluspc/service-end/model"
 )
 
@@ -12,15 +13,21 @@ import (
 // 2->Super user
 // Timeout authorization will be set to 0
 // Suppose that only manager can access the api
-func ValidUserMiddleWare(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+// User level and account name will be set
+type ValidUserMiddleWare struct {
+}
+
+func (v *ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Read authorization from header
+	r.Header.Del("X-Role")
+	r.Header.Del("X-Account")
 	auth := r.Header.Get("Authorization")
 	if len(auth) <= 0 {
 		r.Header.Set("X-Role", "0")
 		next(rw, r)
 		return
 	}
-	ok, name := CheckToken(auth)
+	ok, name := controller.CheckToken(auth)
 	if ok != 2 {
 		r.Header.Set("X-Role", "0")
 		next(rw, r)
@@ -33,11 +40,13 @@ func ValidUserMiddleWare(rw http.ResponseWriter, r *http.Request, next http.Hand
 		next(rw, r)
 		return
 	}
-	isAdmin := CheckIsAdmin(name)
+	isAdmin := controller.CheckIsAdmin(name)
 	if isAdmin {
 		r.Header.Set("X-Role", "2")
 		next(rw, r)
 		return
 	}
+	r.Header.Set("X-Role", "1")
+	r.Header.Set("X-Account", user.Account)
 	next(rw, r)
 }

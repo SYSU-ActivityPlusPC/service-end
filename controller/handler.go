@@ -244,32 +244,34 @@ func ShowActivityDetailHandler(w http.ResponseWriter, r *http.Request) {
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Read header
 	auth := r.Header.Get("Authorization")
-	if len(auth) != 0 {
-		ok, name := CheckToken(auth)
-		if ok == 2 {
-			// Check if the user exist
-			user := model.GetUserInfo(name)
-			if user.ID >= 0 {
-				res := types.PCUserInfo{
-					ID:    user.ID,
-					Name:  user.Name,
-					Logo:  user.Logo,
-					Token: auth,
-				}
-				stringRes, _ := json.Marshal(res)
-				w.Write(stringRes)
-				return
+	role := r.Header.Get("X-Role")
+	if len(role) > 0 {
+		IntRole, _ := strconv.Atoi(role)
+		username := r.Header.Get("X-Account")
+		// Handle role 1 and 2
+		if IntRole == 1 || IntRole == 2 {
+			user := model.GetUserInfo(username)
+			res := types.PCUserInfo{
+				ID:    user.ID,
+				Name:  user.Name,
+				Logo:  user.Logo,
+				Token: auth,
 			}
+			stringRes, _ := json.Marshal(res)
+			w.Write(stringRes)
+			return
 		}
 	}
 	// Check user account and password
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(500)
+		fmt.Println(err)
+		w.WriteHeader(400)
 		return
 	}
 
+	// Get post body
 	jsonBody := new(types.PCUserRequest)
 	err = json.Unmarshal(body, &jsonBody)
 	user := model.GetUserInfo(jsonBody.Account)
@@ -277,6 +279,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+	// Validate password
 	stringID := strconv.Itoa(user.ID)
 	password := getPassword(stringID, jsonBody.Password)
 	if password == user.Password {
