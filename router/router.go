@@ -16,13 +16,10 @@ func GetServer() *negroni.Negroni {
 
 	act := r.PathPrefix("/act").Subrouter()
 	act.HandleFunc("", controller.AddActivityHandler).Methods("POST")
-	act.HandleFunc("/", controller.AddActivityHandler).Methods("POST")
 	act.HandleFunc("/{actId}", controller.ModifyActivityHandler).Methods("POST")
 	act.HandleFunc("/{actId}", controller.DeleteActivityHandler).Methods("DELETE")
-	act.HandleFunc("/", controller.VerifyActivityHandler).Methods("PUT")
 	act.HandleFunc("", controller.VerifyActivityHandler).Methods("PUT")
 	act.HandleFunc("", controller.ShowActivitiesListHandler).Methods("GET")
-	act.HandleFunc("/", controller.ShowActivitiesListHandler).Methods("GET")
 	act.HandleFunc("/{id}", controller.ShowActivityDetailHandler).Methods("GET")
 
 	session := r.PathPrefix("/session").Subrouter()
