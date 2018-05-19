@@ -17,7 +17,7 @@ import (
 type ValidUserMiddleWare struct {
 }
 
-func (v *ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Read authorization from header
 	r.Header.Del("X-Role")
 	r.Header.Del("X-Account")

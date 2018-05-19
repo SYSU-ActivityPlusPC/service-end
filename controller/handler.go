@@ -282,6 +282,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Validate password
 	stringID := strconv.Itoa(user.ID)
 	password := getPassword(stringID, jsonBody.Password)
+	fmt.Println(password)
 	if password == user.Password {
 		// Generate token
 		token, _ := GenerateJWT(user.Account)
