@@ -109,6 +109,11 @@ func GetFileMd5(f io.Reader) string {
 	return fmt.Sprintf("%x", ret)
 }
 
-func CheckIsAdmin(username string) bool{
+// CheckIsAdmin check if the given user is admin
+func CheckIsAdmin(username string) bool {
+	adminAccount := "sysuactivity2018"
+	if username == adminAccount {
+		return true
+	}
 	return false
 }

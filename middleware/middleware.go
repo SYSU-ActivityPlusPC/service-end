@@ -19,8 +19,8 @@ type ValidUserMiddleWare struct {
 }
 
 func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	// Allow all upload request
-	if r.URL.Path == "/upload" {
+	// Allow upload and signup request
+	if r.URL.Path == "/images" || (r.URL.Path == "/pcusers" && r.Method == "POST") {
 		next(rw, r)
 		return
 	}
@@ -29,6 +29,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 	r.Header.Del("X-Role")
 	r.Header.Del("X-Account")
 	auth := r.Header.Get("Authorization")
+	// Check user identity
 	if len(auth) <= 0 {
 		r.Header.Set("X-Role", "0")
 	} else {

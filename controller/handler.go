@@ -29,7 +29,10 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonBody := new(types.StringActivityInfo)
-	json.Unmarshal(body, jsonBody)
+	err = json.Unmarshal(body, jsonBody)
+	if err != nil {
+		w.WriteHeader(400)
+	}
 	_, err = model.AddActivity(*jsonBody)
 	if err != nil {
 		fmt.Println(err)
@@ -258,6 +261,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 				Token: auth,
 			}
 			stringRes, _ := json.Marshal(res)
+			w.Header().Set("X-Role", role)
 			w.Write(stringRes)
 			return
 		}
@@ -279,6 +283,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+	role = "1"
+	// Check if the user is admin
+	isAdmin := CheckIsAdmin(jsonBody.Account)
+	if isAdmin {
+		role = "2"
+	}
 	// Validate password
 	stringID := strconv.Itoa(user.ID)
 	password := getPassword(stringID, jsonBody.Password)
@@ -292,6 +302,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			Token: token,
 		}
 		stringRes, _ := json.Marshal(res)
+		w.Header().Set("X-Role", role)
 		w.Write(stringRes)
 		return
 	}

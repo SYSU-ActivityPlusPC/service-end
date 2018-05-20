@@ -69,6 +69,7 @@ func UpdateActivity(id int, activityInfo types.StringActivityInfo) (int, error) 
 		Poster:          activityInfo.Poster,
 		Qrcode:          activityInfo.Qrcode,
 		Email:           activityInfo.Email,
+		Verified:        0,
 	}
 	affected, err := Engine.Id(id).Update(&activity)
 	return int(affected), err
