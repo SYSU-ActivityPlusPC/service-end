@@ -19,6 +19,11 @@ type ValidUserMiddleWare struct {
 }
 
 func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	// Allow all upload request
+	if r.URL.Path == "/upload" {
+		next(rw, r)
+		return
+	}
 	// Read authorization from header
 	role := 0
 	r.Header.Del("X-Role")
