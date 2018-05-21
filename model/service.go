@@ -55,7 +55,7 @@ func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
 	endtime, err := time.Parse(layout, activityInfo.EndTime)
 	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)
 	pubendtime, err := time.Parse(layout, activityInfo.PubEndTime)
-	var enrollendtime *time.Time = nil
+	var enrollendtime *time.Time
 	if len(activityInfo.EnrollEndTime) != 0 {
 		*enrollendtime, err = time.Parse(layout, activityInfo.EnrollEndTime)
 	}
