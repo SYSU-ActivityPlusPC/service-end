@@ -8,12 +8,16 @@ import (
 )
 
 // AddActivity insert a activity into the db
-func AddActivity(activityInfo types.StringActivityInfo) (int, error) {
+func AddActivity(activityInfo types.ActivityInfo) (int, error) {
 	layout := "2006-01-02 15:04"
 	starttime, err := time.Parse(layout, activityInfo.StartTime)
 	endtime, err := time.Parse(layout, activityInfo.EndTime)
 	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)
 	pubendtime, err := time.Parse(layout, activityInfo.PubEndTime)
+	var enrollendtime *time.Time = nil
+	if len(activityInfo.EnrollEndTime) != 0 {
+		*enrollendtime, err = time.Parse(layout, activityInfo.EnrollEndTime)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -37,17 +41,24 @@ func AddActivity(activityInfo types.StringActivityInfo) (int, error) {
 		Qrcode:          activityInfo.Qrcode,
 		Email:           activityInfo.Email,
 		Verified:        0,
+		EnrollWay:       activityInfo.EnrollWay,
+		EnrollEndTime:   enrollendtime,
+		CanEnrolled:     activityInfo.CanEnrolled,
 	}
 	affected, err := Engine.InsertOne(&activity)
 	return int(affected), nil
 }
 
-func UpdateActivity(id int, activityInfo types.StringActivityInfo) (int, error) {
+func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
 	layout := "2006-01-02 15:04:05"
 	starttime, err := time.Parse(layout, activityInfo.StartTime)
 	endtime, err := time.Parse(layout, activityInfo.EndTime)
 	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)
 	pubendtime, err := time.Parse(layout, activityInfo.PubEndTime)
+	var enrollendtime *time.Time = nil
+	if len(activityInfo.EnrollEndTime) != 0 {
+		*enrollendtime, err = time.Parse(layout, activityInfo.EnrollEndTime)
+	}
 	if err != nil {
 		return 0, err
 	}
@@ -63,6 +74,9 @@ func UpdateActivity(id int, activityInfo types.StringActivityInfo) (int, error) 
 		PubStartTime:    &pubstarttime,
 		PubEndTime:      &pubendtime,
 		Detail:          activityInfo.Detail,
+		CanEnrolled:     activityInfo.CanEnrolled,
+		EnrollWay:       activityInfo.EnrollWay,
+		EnrollEndTime:   enrollendtime,
 		Reward:          activityInfo.Reward,
 		Introduction:    activityInfo.Introduction,
 		Requirement:     activityInfo.Requirement,

@@ -16,11 +16,14 @@ type ActivityInfo struct {
 	PubStartTime    *time.Time
 	PubEndTime      *time.Time
 	Detail          string `xorm:"varchar(150)" `
+	EnrollWay       string
+	EnrollEndTime   *time.Time
 	Reward          string `xorm:"varchar(30)"`
 	Introduction    string `xorm:"varchar(50)"`
 	Requirement     string `xorm:"varchar(50)"`
 	Poster          string `xorm:"varchar(64)"`
 	Qrcode          string `xorm:"varchar(64)"`
+	CanEnrolled     int
 	Email           string `xorm:"varchar(255)"`
 	Verified        int    `xorm:"int 'verified'"`
 }

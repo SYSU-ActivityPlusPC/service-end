@@ -28,7 +28,7 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonBody := new(types.StringActivityInfo)
+	jsonBody := new(types.ActivityInfo)
 	err = json.Unmarshal(body, jsonBody)
 	if err != nil {
 		w.WriteHeader(400)
@@ -62,7 +62,7 @@ func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonBody := new(types.StringActivityInfo)
+	jsonBody := new(types.ActivityInfo)
 	json.Unmarshal(body, jsonBody)
 	_, err = model.UpdateActivity(intActID, *jsonBody)
 	if err != nil {
@@ -206,19 +206,20 @@ func ShowActivityDetailHandler(w http.ResponseWriter, r *http.Request) {
 	if intID > 0 {
 		ok, activityInfo := model.GetActivityInfo(intID)
 		if ok {
+			layout := "2006-01-02 15:04"
 			// Convert to ms
-			retMsg := types.IntActivityInfo{
+			retMsg := types.ActivityInfo{
 				ID:              activityInfo.ID,
 				Name:            activityInfo.Name,
-				StartTime:       activityInfo.StartTime.UnixNano() / int64(time.Millisecond),
-				EndTime:         activityInfo.EndTime.UnixNano() / int64(time.Millisecond),
+				StartTime:       activityInfo.StartTime.Format(layout),
+				EndTime:         activityInfo.EndTime.Format(layout),
 				Campus:          activityInfo.Campus,
 				Location:        activityInfo.Location,
 				EnrollCondition: activityInfo.EnrollCondition,
 				Sponsor:         activityInfo.Sponsor,
 				Type:            activityInfo.Type,
-				PubStartTime:    activityInfo.PubStartTime.UnixNano() / int64(time.Millisecond),
-				PubEndTime:      activityInfo.PubEndTime.UnixNano() / int64(time.Millisecond),
+				PubStartTime:    activityInfo.PubStartTime.Format(layout),
+				PubEndTime:      activityInfo.PubEndTime.Format(layout),
 				Detail:          activityInfo.Detail,
 				Reward:          activityInfo.Reward,
 				Introduction:    activityInfo.Introduction,

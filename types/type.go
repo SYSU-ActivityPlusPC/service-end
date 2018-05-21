@@ -1,7 +1,7 @@
 package types
 
 // StringActivityInfo stores json format the front-end wanted
-type StringActivityInfo struct {
+type ActivityInfo struct {
 	ID              int    `json:"id"`
 	Name            string `json:"name"`
 	StartTime       string `json:"startTime"`
@@ -20,6 +20,11 @@ type StringActivityInfo struct {
 	Poster          string `json:"poster"`
 	Qrcode          string `json:"qrcode"`
 	Email           string `json:"email"`
+	EnrollWay       string `json:"enrollWay"`
+	EnrollEndTime   string `json:"enrollEndTime"`
+	CanEnrolled     int    `json:"can_enrolled"`
+	PCUserID        int    `json:"pcuser_id"`
+	Verified        int    `json:"verified"`
 }
 
 // IntActivityInfo stores json format the front-end wanted
