@@ -62,6 +62,7 @@ type ActivityIntroduction struct {
 	PubStartTime    int64  `json:"pubStartTime"`
 	PubEndTime      int64  `json:"pubEndTime"`
 	Verified        int    `json:"verified"`
+	Type            int    `json:"type"`
 }
 
 // ActivityList defines the return format

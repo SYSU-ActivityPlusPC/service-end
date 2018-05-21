@@ -23,6 +23,8 @@ import (
 func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
+	stringID := r.Header.Get("X-ID")
+	ID, err := strconv.Atoi(stringID)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -33,7 +35,7 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(400)
 	}
-	_, err = model.AddActivity(*jsonBody)
+	_, err = model.AddActivity(*jsonBody, ID)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(500)
@@ -167,6 +169,7 @@ func ShowActivitiesListHandler(w http.ResponseWriter, r *http.Request) {
 				PubStartTime:    activityList[i].PubStartTime.UnixNano() / int64(time.Millisecond),
 				PubEndTime:      activityList[i].PubEndTime.UnixNano() / int64(time.Millisecond),
 				Verified:        activityList[i].Verified,
+				Type:            activityList[i].Type,
 			}
 			infoArr = append(infoArr, tmp)
 		}

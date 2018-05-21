@@ -26,6 +26,7 @@ type ActivityInfo struct {
 	CanEnrolled     int
 	Email           string `xorm:"varchar(255)"`
 	Verified        int    `xorm:"int 'verified'"`
+	PCUserID        int    `xorm:"int 'pcuser_id'"`
 }
 
 // PCUser stores pc user message

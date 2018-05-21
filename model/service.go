@@ -8,13 +8,13 @@ import (
 )
 
 // AddActivity insert a activity into the db
-func AddActivity(activityInfo types.ActivityInfo) (int, error) {
+func AddActivity(activityInfo types.ActivityInfo, id int) (int, error) {
 	layout := "2006-01-02 15:04"
 	starttime, err := time.Parse(layout, activityInfo.StartTime)
 	endtime, err := time.Parse(layout, activityInfo.EndTime)
 	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)
 	pubendtime, err := time.Parse(layout, activityInfo.PubEndTime)
-	var enrollendtime *time.Time = nil
+	var enrollendtime *time.Time
 	if len(activityInfo.EnrollEndTime) != 0 {
 		*enrollendtime, err = time.Parse(layout, activityInfo.EnrollEndTime)
 	}
@@ -22,7 +22,6 @@ func AddActivity(activityInfo types.ActivityInfo) (int, error) {
 		return 0, err
 	}
 	activity := ActivityInfo{
-		ID:              activityInfo.ID,
 		Name:            activityInfo.Name,
 		StartTime:       &starttime,
 		EndTime:         &endtime,
@@ -44,13 +43,14 @@ func AddActivity(activityInfo types.ActivityInfo) (int, error) {
 		EnrollWay:       activityInfo.EnrollWay,
 		EnrollEndTime:   enrollendtime,
 		CanEnrolled:     activityInfo.CanEnrolled,
+		PCUserID:        id,
 	}
 	affected, err := Engine.InsertOne(&activity)
 	return int(affected), nil
 }
 
 func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
-	layout := "2006-01-02 15:04:05"
+	layout := "2006-01-02 15:04"
 	starttime, err := time.Parse(layout, activityInfo.StartTime)
 	endtime, err := time.Parse(layout, activityInfo.EndTime)
 	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)

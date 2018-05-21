@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"strconv"
 	"net/http"
 	"strings"
 
@@ -49,8 +50,9 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				} else {
 					role = 1
 					r.Header.Set("X-Role", "1")
-					r.Header.Set("X-Account", user.Account)
 				}
+				r.Header.Set("X-Account", user.Account)
+				r.Header.Set("X-ID", strconv.Itoa(user.ID))
 			}
 		}
 	}
