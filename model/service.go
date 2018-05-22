@@ -11,15 +11,28 @@ import (
 func AddActivity(activityInfo types.ActivityInfo, id int) (int, error) {
 	layout := "2006-01-02 15:04"
 	starttime, err := time.Parse(layout, activityInfo.StartTime)
-	endtime, err := time.Parse(layout, activityInfo.EndTime)
-	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)
-	pubendtime, err := time.Parse(layout, activityInfo.PubEndTime)
-	var enrollendtime *time.Time
-	if len(activityInfo.EnrollEndTime) != 0 {
-		*enrollendtime, err = time.Parse(layout, activityInfo.EnrollEndTime)
-	}
 	if err != nil {
 		return 0, err
+	}
+	endtime, err := time.Parse(layout, activityInfo.EndTime)
+	if err != nil {
+		return 0, err
+	}
+	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)
+	if err != nil {
+		return 0, err
+	}
+	pubendtime, err := time.Parse(layout, activityInfo.PubEndTime)
+	if err != nil {
+		return 0, err
+	}
+	var Enrollendtime *time.Time
+	if len(activityInfo.EnrollEndTime) != 0 {
+		enrollendtime, err := time.Parse(layout, activityInfo.EnrollEndTime)
+		Enrollendtime = &enrollendtime
+		if err != nil {
+			return 0, err
+		}
 	}
 	activity := ActivityInfo{
 		Name:            activityInfo.Name,
@@ -41,7 +54,7 @@ func AddActivity(activityInfo types.ActivityInfo, id int) (int, error) {
 		Email:           activityInfo.Email,
 		Verified:        0,
 		EnrollWay:       activityInfo.EnrollWay,
-		EnrollEndTime:   enrollendtime,
+		EnrollEndTime:   Enrollendtime,
 		CanEnrolled:     activityInfo.CanEnrolled,
 		PCUserID:        id,
 	}
@@ -52,12 +65,28 @@ func AddActivity(activityInfo types.ActivityInfo, id int) (int, error) {
 func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
 	layout := "2006-01-02 15:04"
 	starttime, err := time.Parse(layout, activityInfo.StartTime)
+	if err != nil {
+		return 0, err
+	}
 	endtime, err := time.Parse(layout, activityInfo.EndTime)
+	if err != nil {
+		return 0, err
+	}
 	pubstarttime, err := time.Parse(layout, activityInfo.PubStartTime)
+	if err != nil {
+		return 0, err
+	}
 	pubendtime, err := time.Parse(layout, activityInfo.PubEndTime)
-	var enrollendtime *time.Time
+	if err != nil {
+		return 0, err
+	}
+	var Enrollendtime *time.Time
 	if len(activityInfo.EnrollEndTime) != 0 {
-		*enrollendtime, err = time.Parse(layout, activityInfo.EnrollEndTime)
+		enrollendtime, err := time.Parse(layout, activityInfo.EnrollEndTime)
+		Enrollendtime = &enrollendtime
+		if err != nil {
+			return 0, err
+		}
 	}
 	if err != nil {
 		return 0, err
@@ -76,7 +105,7 @@ func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
 		Detail:          activityInfo.Detail,
 		CanEnrolled:     activityInfo.CanEnrolled,
 		EnrollWay:       activityInfo.EnrollWay,
-		EnrollEndTime:   enrollendtime,
+		EnrollEndTime:   Enrollendtime,
 		Reward:          activityInfo.Reward,
 		Introduction:    activityInfo.Introduction,
 		Requirement:     activityInfo.Requirement,
