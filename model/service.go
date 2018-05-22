@@ -59,6 +59,10 @@ func AddActivity(activityInfo types.ActivityInfo, id int) (int, error) {
 		PCUserID:        id,
 	}
 	affected, err := Engine.InsertOne(&activity)
+	if err != nil {
+		fmt.Println(err)
+		return 0, err
+	}
 	return int(affected), nil
 }
 

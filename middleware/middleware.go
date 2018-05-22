@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"strconv"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/sysu-activitypluspc/service-end/controller"
@@ -38,7 +38,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 		if ok != 2 {
 			r.Header.Set("X-Role", "0")
 		} else {
-			// Check name
+			// Check user account
 			user := model.GetUserInfo(name)
 			if user.ID <= 0 {
 				r.Header.Set("X-Role", "0")
@@ -60,6 +60,11 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 	path := r.URL.Path
 	// Pass /session path
 	if path != "/session" {
+		// Allow anonymous user add activity
+		if path == "/act" && r.Method == "POST" {
+			next(rw, r)
+			return
+		}
 		// Refuse all the anyous user
 		if role == 0 {
 			rw.WriteHeader(401)

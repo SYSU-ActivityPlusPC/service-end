@@ -24,6 +24,10 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
 	stringID := r.Header.Get("X-ID")
+	// Handle anonymous user 
+	if len(stringID) == 0 {
+		stringID = "-1"
+	}
 	ID, err := strconv.Atoi(stringID)
 	if err != nil {
 		w.WriteHeader(500)
