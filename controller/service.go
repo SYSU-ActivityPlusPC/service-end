@@ -3,7 +3,6 @@ package controller
 import (
 	"crypto/md5"
 	"fmt"
-	"io"
 	"strings"
 	"time"
 
@@ -95,17 +94,6 @@ func getPassword(id string, raw string) string {
 // GetMd5 return md5 of given content
 func GetMd5(content []byte) string {
 	ret := md5.Sum(content)
-	return fmt.Sprintf("%x", ret)
-}
-
-// GetFileMd5 get md5 of file
-func GetFileMd5(f io.Reader) string {
-	h := md5.New()
-	if _, err := io.Copy(h, f); err != nil {
-		fmt.Println(err)
-		return ""
-	}
-	ret := h.Sum(nil)
 	return fmt.Sprintf("%x", ret)
 }
 

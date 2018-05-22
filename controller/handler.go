@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -24,7 +23,7 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
 	stringID := r.Header.Get("X-ID")
-	// Handle anonymous user 
+	// Handle anonymous user
 	if len(stringID) == 0 {
 		stringID = "-1"
 	}
@@ -348,7 +347,13 @@ func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 	staticFilePosition := os.Getenv("STATIC_DIR")
-	md5Filename := GetFileMd5(file)
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(400)
+		return
+	}
+	md5Filename := GetMd5(content)
 	ext := path.Ext(handler.Filename)
 	filename := strings.Join([]string{md5Filename, ext}, "")
 	// Check if the file exists
@@ -360,7 +365,7 @@ func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(500)
 		}
 		defer f.Close()
-		if _, err = io.Copy(f, file); err != nil {
+		if _, err = f.Write(content); err != nil {
 			w.WriteHeader(500)
 			return
 		}
