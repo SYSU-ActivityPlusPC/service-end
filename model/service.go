@@ -66,6 +66,7 @@ func AddActivity(activityInfo types.ActivityInfo, id int) (int, error) {
 	return int(affected), nil
 }
 
+// UpdateActivity update activity
 func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
 	layout := "2006-01-02 15:04"
 	starttime, err := time.Parse(layout, activityInfo.StartTime)
@@ -122,6 +123,7 @@ func UpdateActivity(id int, activityInfo types.ActivityInfo) (int, error) {
 	return int(affected), err
 }
 
+// DeleteActivity remove an activity according to the id
 func DeleteActivity(id int) (int, error) {
 	affected, err := Engine.Id(id).Delete(&ActivityInfo{})
 	if err != nil {
@@ -133,6 +135,7 @@ func DeleteActivity(id int) (int, error) {
 	return int(affected), nil
 }
 
+// VerifyActivity set activity verified status
 func VerifyActivity(id int, status int) (int, error) {
 	activity := new(ActivityInfo)
 	activity.Verified = status
@@ -238,11 +241,23 @@ func GetUserByID(id int) *PCUser{
 	return user
 }
 
+// VerifyUser set user verified status
 func VerifyUser(id int, verify int, email string, password string) error{
 	user := new(PCUser)
 	user.Verified = verify
 	user.Email = email
 	user.Password = password
-	_, err := Engine.Where("id=?", id).Cols("verify").Update(user)
+	_, err := Engine.Where("id=?", id).Cols("verified").Update(user)
 	return err
+}
+
+// GetUserList get all the user with given status
+func GetUserList(verify int) []PCUser{
+	ret := make([]PCUser, 0)
+	err := Engine.Where("verified = ?", verify).Incr("id").Find(&ret)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return ret
 }

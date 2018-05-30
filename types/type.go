@@ -69,7 +69,7 @@ type PCUserSignInfo struct {
 	Info     string `json:"info"`
 }
 
-// PCUserInfo include sign up message
+// PCUserDetailedInfo include sign up message
 type PCUserDetailedInfo struct {
 	Name         string `json:"name"`
 	Email        string `json:"email"`
@@ -91,4 +91,13 @@ type EmailContent struct {
 	To      string
 	Subject string
 	Content string
+}
+
+// PCUserListInfo in the list
+type PCUserListInfo struct {
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	Logo         string `json:"logo"`
+	Verified     int    `json:"verified"`
+	RegisterTime string `json:"register_time"`
 }

@@ -476,3 +476,49 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 	}
 }
+
+func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	stringType := r.FormValue("type")
+	intType, err := strconv.Atoi(stringType)
+	if err != nil || (intType != 0 && intType != 1) {
+		w.WriteHeader(400)
+		return
+	}
+
+	type pcuserList struct {
+		content []types.PCUserListInfo
+	}
+
+	retContent := make([]types.PCUserListInfo, 0)
+	if intType == 0 {
+		userList := model.GetUserList(1)
+		if userList == nil {
+			w.WriteHeader(500)
+			return
+		}
+		if len(userList) == 0 {
+			w.WriteHeader(204)
+			return
+		}
+		for _, v := range userList {
+			layout := "2006-01-02 15:04"
+			stringTime := v.RegisterTime.Format(layout)
+			tmp := types.PCUserListInfo{v.ID, v.Name, v.Logo, v.Verified, stringTime}
+			retContent = append(retContent, tmp)
+		}
+	} else {
+		userList := model.GetUserList(1)
+		tmp := model.GetUserList(0)
+		if userList == nil || tmp == nil{
+			w.WriteHeader(500)
+			return
+		}
+		userList = append(userList, tmp...)
+		if len(userList) == 0 {
+			w.WriteHeader(204)
+			return
+		}
+
+	}
+}
