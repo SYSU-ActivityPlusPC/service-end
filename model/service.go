@@ -242,11 +242,12 @@ func GetUserByID(id int) *PCUser{
 }
 
 // VerifyUser set user verified status
-func VerifyUser(id int, verify int, email string, password string) error{
+func VerifyUser(id int, verify int, email string, password string, currentTime time.Time) error{
 	user := new(PCUser)
 	user.Verified = verify
 	user.Email = email
 	user.Password = password
+	user.RegisterTime = &currentTime
 	_, err := Engine.Where("id=?", id).Cols("verified").Update(user)
 	return err
 }

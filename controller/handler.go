@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"sort"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -422,6 +423,7 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get body message
 	refuseMessage := ""
 	type rejectMsg struct {
 		refuseInfo string
@@ -440,20 +442,20 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		refuseMessage = jsonBody.refuseInfo
 	}
 
-	// Update db
+	// Update db, including time, password, account and status
 	user := model.GetUserByID(intID)
 	if user.ID == -1 {
 		w.WriteHeader(204)
 		return
 	}
 	password := getPassword(strconv.Itoa(user.ID), GeneratePassword(12))
-	err = model.VerifyUser(intID, intVerify, user.Email, password)
+	err = model.VerifyUser(intID, intVerify, user.Email, password, time.Now())
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(204)
 		return
 	}
-	// Send message
+	// Send message to the mq
 	subject := "恭喜，您的注册请求已通过"
 	if intVerify == 0 {
 		subject = "很抱歉，您的注册请求未被通过"
@@ -490,8 +492,10 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 		content []types.PCUserListInfo
 	}
 
+	// Get user list from the db
 	retContent := make([]types.PCUserListInfo, 0)
 	if intType == 0 {
+		// Get only the verified user
 		userList := model.GetUserList(1)
 		if userList == nil {
 			w.WriteHeader(500)
@@ -508,9 +512,10 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 			retContent = append(retContent, tmp)
 		}
 	} else {
+		// Get all of the user
 		userList := model.GetUserList(1)
 		tmp := model.GetUserList(0)
-		if userList == nil || tmp == nil{
+		if userList == nil || tmp == nil {
 			w.WriteHeader(500)
 			return
 		}
@@ -519,6 +524,22 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(204)
 			return
 		}
-
+		// Sort list
+		sort.Sort(model.SortablePCUserList(userList))
+		for _, v := range userList {
+			layout := "2006-01-02 15:04"
+			stringTime := v.RegisterTime.Format(layout)
+			tmp := types.PCUserListInfo{v.ID, v.Name, v.Logo, v.Verified, stringTime}
+			retContent = append(retContent, tmp)
+		}
 	}
+	// Write content back to the response
+	jsonRet := pcuserList{retContent}
+	byteRet, err := json.Marshal(jsonRet)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	w.Write(byteRet)
 }

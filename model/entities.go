@@ -43,6 +43,9 @@ type PCUser struct {
 	RegisterTime *time.Time
 }
 
+// SortablePCUserList implement sort interface
+type SortablePCUserList []PCUser
+
 // TableName defines table name
 func (u ActivityInfo) TableName() string {
 	return "activity"
@@ -50,4 +53,17 @@ func (u ActivityInfo) TableName() string {
 
 func (u PCUser) TableName() string {
 	return "pcuser"
+}
+
+// Sort interface for list
+func (s SortablePCUserList) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s SortablePCUserList) Len() int {
+	return len(s)
+}
+
+func (s SortablePCUserList) Less(i, j int) bool {
+	return s[i].RegisterTime.Before(*s[j].RegisterTime)
 }
