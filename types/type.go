@@ -69,7 +69,26 @@ type PCUserSignInfo struct {
 	Info     string `json:"info"`
 }
 
+// PCUserInfo include sign up message
+type PCUserDetailedInfo struct {
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	Logo         string `json:"logo"`
+	Evidence     string `json:"evidence"`
+	Info         string `json:"info"`
+	Account      string `json:"account"`
+	RegisterTime string `json:"registerTime"`
+}
+
 // FileInfo include filename of the file
 type FileInfo struct {
 	Filename string `json:"filename"`
+}
+
+// EmailContent contains email message
+type EmailContent struct {
+	From    string
+	To      string
+	Subject string
+	Content string
 }

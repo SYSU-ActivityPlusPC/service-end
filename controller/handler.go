@@ -329,6 +329,9 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(400)
 	}
+	if isEmailExist := CheckIfEmailExist(jsonBody.Email); isEmailExist == true {
+		w.WriteHeader(400)
+	}
 	ok := model.AddUser(*jsonBody)
 	if ok {
 		w.WriteHeader(200)
@@ -375,4 +378,101 @@ func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	resBody, _ := json.Marshal(fileInfo)
 	w.Write(resBody)
+}
+
+func GetUserListHandler(w http.ResponseWriter, r *http.Request) {
+	userID := mux.Vars(r)["id"]
+	intID, err := strconv.Atoi(userID)
+	if err != nil {
+		w.WriteHeader(400)
+		return
+	}
+	user := model.GetUserByID(intID)
+	if user.ID == -1 {
+		w.WriteHeader(204)
+	}
+	layout := "2006-01-02 15:04"
+	stringTime := user.RegisterTime.Format(layout)
+	jsonRet := types.PCUserDetailedInfo{user.Name, user.Email, user.Logo, user.Evidence, user.Info, user.Account, stringTime}
+	byteRet, err := json.Marshal(jsonRet)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	w.Write(byteRet)
+}
+
+func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	id := r.FormValue("id")
+	verify := r.FormValue("verify")
+	intID, err := strconv.Atoi(id)
+	if err != nil {
+		w.WriteHeader(400)
+		return
+	}
+	intVerify, err := strconv.Atoi(verify)
+	if err != nil {
+		w.WriteHeader(400)
+		return
+	}
+	if intVerify != 0 && intVerify != 1 {
+		w.WriteHeader(400)
+		return
+	}
+
+	refuseMessage := ""
+	type rejectMsg struct {
+		refuseInfo string
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	jsonBody := new(rejectMsg)
+	err = json.Unmarshal(body, jsonBody)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		refuseMessage = jsonBody.refuseInfo
+	}
+
+	// Update db
+	user := model.GetUserByID(intID)
+	if user.ID == -1 {
+		w.WriteHeader(204)
+		return
+	}
+	password := getPassword(strconv.Itoa(user.ID), GeneratePassword(12))
+	err = model.VerifyUser(intID, intVerify, user.Email, password)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(204)
+		return
+	}
+	// Send message
+	subject := "恭喜，您的注册请求已通过"
+	if intVerify == 0 {
+		subject = "很抱歉，您的注册请求未被通过"
+	}
+	content := refuseMessage
+	if intVerify == 1 {
+		content = fmt.Sprintf("您的登录账户信息为: %s\r\n您的登录密码为:%s\r\n感谢您使用中大活动", user.Email, password)
+	}
+	msg := types.EmailContent{"admin@sysuactivity.com", user.Email, subject, content}
+	byteContent, err := json.Marshal(msg)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	ok := WriteMessageQueue("email", byteContent)
+	if ok {
+		w.WriteHeader(200)
+	} else {
+		w.WriteHeader(500)
+	}
 }

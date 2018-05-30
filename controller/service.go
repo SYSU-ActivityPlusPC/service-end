@@ -3,8 +3,14 @@ package controller
 import (
 	"crypto/md5"
 	"fmt"
+	"math/rand"
+	"os"
 	"strings"
 	"time"
+
+	"github.com/sethvargo/go-password/password"
+	"github.com/streadway/amqp"
+	"github.com/sysu-activitypluspc/service-end/model"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -104,4 +110,81 @@ func CheckIsAdmin(username string) bool {
 		return true
 	}
 	return false
+}
+
+// CheckEmail check if the user email exists in the db
+func CheckIfEmailExist(email string) bool {
+	user := model.GetUserByEmail(email)
+	if user == nil {
+		return true
+	}
+	if user.Email == "" {
+		return false
+	}
+	return true
+}
+
+// GeneratePassword generate password
+func GeneratePassword(length int) string {
+	res, err := password.Generate(length, 1+rand.Int()%(length/2), 10, false, false)
+	if err != nil {
+		return "password"
+	}
+	return res
+}
+
+// WriteMessageQueue write content to the named queue
+func WriteMessageQueue(name string, content []byte) bool {
+	// Get mq detaild message
+	addr := os.Getenv("MQ_ADDRESS")
+	if len(addr) == 0 {
+		addr = "localhost"
+	}
+	port := os.Getenv("MQ_PORT")
+	if len(port) == 0 {
+		port = "5672"
+	}
+	user := os.Getenv("MQ_USER")
+	pass := os.Getenv("MQ_PASSWORD")
+	url := fmt.Sprintf("amqp://%s:%s@%s:%s/", user, pass, addr, port)
+
+	// Connect to mq
+	conn, err := amqp.Dial(url)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare(
+		name,  // name
+		true,  // durable
+		false, // delete when unused
+		false, // exclusive
+		false, // no-wait
+		nil,   // arguments
+	)
+	// Send
+	err = ch.Publish(
+		"",     // exchange
+		q.Name, // routing key
+		false,  // mandatory
+		false,
+		amqp.Publishing{
+			DeliveryMode: amqp.Persistent,
+			ContentType:  "text/plain",
+			Body:         content,
+		})
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
 }

@@ -31,15 +31,16 @@ type ActivityInfo struct {
 
 // PCUser stores pc user message
 type PCUser struct {
-	ID       int    `xorm:"pk autoincr 'id'"`
-	Name     string `xorm:"varchar(45) notnull"`
-	Email    string `xorm:"varchar(255) notnull"`
-	Logo     string `xorm:"varchar(70) notnull"`
-	Evidence string `xorm:"varchar(70) notnull"`
-	Info     string `xorm:"varchar(150)"`
-	Verified int    `xorm:"int notnull"`
-	Account  string `xorm:"varchar(64)"`
-	Password string `xorm:"varchar(64)"`
+	ID           int    `xorm:"pk autoincr 'id'"`
+	Name         string `xorm:"varchar(45) notnull"`
+	Email        string `xorm:"varchar(255) notnull"`
+	Logo         string `xorm:"varchar(70) notnull"`
+	Evidence     string `xorm:"varchar(70) notnull"`
+	Info         string `xorm:"varchar(150)"`
+	Verified     int    `xorm:"int notnull"`
+	Account      string `xorm:"varchar(64)"`
+	Password     string `xorm:"varchar(64)"`
+	RegisterTime *time.Time
 }
 
 // TableName defines table name

@@ -196,12 +196,14 @@ func GetUserInfo(username string) PCUser {
 
 // AddUser add user
 func AddUser(user types.PCUserSignInfo) bool {
+	currentTime := time.Now()
 	dbuser := PCUser{
-		Name:     user.Name,
-		Email:    user.Email,
-		Logo:     user.Logo,
-		Evidence: user.Evidence,
-		Info:     user.Info,
+		Name:         user.Name,
+		Email:        user.Email,
+		Logo:         user.Logo,
+		Evidence:     user.Evidence,
+		Info:         user.Info,
+		RegisterTime: &currentTime,
 	}
 	_, err := Engine.InsertOne(&dbuser)
 	if err != nil {
@@ -209,4 +211,38 @@ func AddUser(user types.PCUserSignInfo) bool {
 		return false
 	}
 	return true
+}
+
+// GetUserByEmail return user detail based on email
+func GetUserByEmail(email string) *PCUser {
+	user := new(PCUser)
+	_, err := Engine.Where("email=?", email).Get(user)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return user
+}
+
+// GetUserByID return user detail based on id
+func GetUserByID(id int) *PCUser{
+	user := new(PCUser)
+	ok, err := Engine.Where("id=?", id).Get(user)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	if !ok {
+		user.ID = -1
+	}
+	return user
+}
+
+func VerifyUser(id int, verify int, email string, password string) error{
+	user := new(PCUser)
+	user.Verified = verify
+	user.Email = email
+	user.Password = password
+	_, err := Engine.Where("id=?", id).Cols("verify").Update(user)
+	return err
 }

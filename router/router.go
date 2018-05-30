@@ -27,6 +27,8 @@ func GetServer() *negroni.Negroni {
 
 	pcuser := r.PathPrefix("/pcusers").Subrouter()
 	pcuser.HandleFunc("", controller.SignUpHandler).Methods("POST")
+	pcuser.HandleFunc("/{id}", controller.GetUserListHandler).Methods("GET")
+	pcuser.HandleFunc("", ).Methods("PUT")
 
 	r.HandleFunc("/images", controller.UploadImageHandler).Methods("POST")
 
