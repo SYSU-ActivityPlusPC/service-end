@@ -80,6 +80,10 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				rw.WriteHeader(401)
 				return
 			}
+			if strings.HasPrefix(path, "/message") {
+				rw.WriteHeader(401)
+				return
+			} 
 		}
 	}
 	next(rw, r)
