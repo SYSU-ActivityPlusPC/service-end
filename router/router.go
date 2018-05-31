@@ -31,6 +31,12 @@ func GetServer() *negroni.Negroni {
 	pcuser.HandleFunc("", controller.VerifyPCUserHandler).Methods("PUT")
 	pcuser.HandleFunc("", controller.GetPCUserListHandler).Methods("GET")
 
+	message := r.PathPrefix("/message").Subrouter()
+	message.HandleFunc("", controller.AddMessageHandler).Methods("POST")
+	message.HandleFunc("", controller.ShowMessagesListHandler).Methods("GET")
+	message.HandleFunc("/{id}", controller.ShowMessageDetailHandler).Methods("GET")
+	message.HandleFunc("/{id}", controller.DeleteMessageHandler).Methods("DELETE")
+	
 	r.HandleFunc("/images", controller.UploadImageHandler).Methods("POST")
 
 	s.UseHandler(r)
