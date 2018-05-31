@@ -21,7 +21,8 @@ func init() {
 	if len(DBPORT) != 0 && DBPORT[0] != ':' {
 		DBPORT = ":" + DBPORT
 	}
-	url := fmt.Sprintf("root:root@tcp(%s%s)/activityplus?charset=utf8", DBADDRESS, DBPORT)
+	// url := fmt.Sprintf("root:root@tcp(%s%s)/activityplus?charset=utf8", DBADDRESS, DBPORT)
+	url := fmt.Sprintf("root:root@tcp(119.29.155.194:5000)/activityplus?charset=utf8")
 	var err error
 	engine, err := xorm.NewEngine("mysql", url)
 	if err != nil {
