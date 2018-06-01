@@ -81,6 +81,13 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				return
 			}
 		}
+		// Refuse all the pcusers api
+		if path == "/pcusers" || strings.HasPrefix(path, "/pcusers/") {
+			if role != 2 {
+				rw.WriteHeader(401)
+				return
+			}
+		}
 	}
 	next(rw, r)
 }

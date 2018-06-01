@@ -65,5 +65,8 @@ func (s SortablePCUserList) Len() int {
 }
 
 func (s SortablePCUserList) Less(i, j int) bool {
-	return s[i].RegisterTime.Before(*s[j].RegisterTime)
+	if s[i].RegisterTime != nil && s[j].RegisterTime != nil {
+		return s[i].RegisterTime.Before(*s[j].RegisterTime)
+	}
+	return s[i].ID <= s[j].ID
 }
