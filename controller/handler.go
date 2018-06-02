@@ -478,7 +478,7 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		content = fmt.Sprintf("您的登录账户信息为: %s<br />您的登录密码为: %s<br />感谢您使用中大活动", user.Email, password)
 	}
 	msg := types.EmailContent{"admin@sysuactivity.com", user.Email, subject, content}
-	SendMail(msg.From, msg.To, msg.Content, msg.Subject)
+	go SendMail(msg.From, msg.To, msg.Content, msg.Subject)
 	// byteContent, err := json.Marshal(&msg)
 	// if err != nil {
 	// 	fmt.Println(err)
