@@ -427,8 +427,8 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Get body message
 	refuseMessage := ""
-	type rejectMsg struct {
-		refuseInfo string
+	type RejectMsg struct {
+		RefuseInfo string
 	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -436,18 +436,22 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	jsonBody := new(rejectMsg)
+	jsonBody := new(RejectMsg)
 	err = json.Unmarshal(body, jsonBody)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		refuseMessage = jsonBody.refuseInfo
+		refuseMessage = jsonBody.RefuseInfo
 	}
 
 	// Update db, including time, password, account and status
 	user := model.GetUserByID(intID)
 	if user.ID == -1 {
 		w.WriteHeader(204)
+		return
+	}
+	if user.Verified == 1 {
+		w.WriteHeader(http.StatusNotModified)
 		return
 	}
 	var password string
@@ -464,16 +468,16 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Send message to the mq
-	subject := "恭喜，您的注册请求已通过"
+	subject := "中大活动: 恭喜，您的账号注册请求被已通过"
 	if intVerify == 0 {
-		subject = "很抱歉，您的注册请求未被通过"
+		subject = "中大活动: 很抱歉，您的账号注册请求未被通过"
 	}
 	content := refuseMessage
 	if intVerify == 1 {
-		content = fmt.Sprintf("您的登录账户信息为: %s\r\n您的登录密码为:%s\r\n感谢您使用中大活动", user.Email, password)
+		content = fmt.Sprintf("您的登录账户信息为: %s<br />您的登录密码为: %s<br />感谢您使用中大活动", user.Email, password)
 	}
 	msg := types.EmailContent{"admin@sysuactivity.com", user.Email, subject, content}
-	byteContent, err := json.Marshal(msg)
+	byteContent, err := json.Marshal(&msg)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(500)
