@@ -228,7 +228,7 @@ func GetUserByEmail(email string) *PCUser {
 }
 
 // GetUserByID return user detail based on id
-func GetUserByID(id int) *PCUser{
+func GetUserByID(id int) *PCUser {
 	user := new(PCUser)
 	ok, err := Engine.Where("id=?", id).Get(user)
 	if err != nil {
@@ -242,18 +242,18 @@ func GetUserByID(id int) *PCUser{
 }
 
 // VerifyUser set user verified status
-func VerifyUser(id int, verify int, email string, password string, currentTime time.Time) error{
+func VerifyUser(id int, verify int, email string, password string, currentTime *time.Time) error {
 	user := new(PCUser)
 	user.Verified = verify
-	user.Email = email
+	user.Account = email
 	user.Password = password
-	user.RegisterTime = &currentTime
-	_, err := Engine.Where("id=?", id).Cols("verified").Update(user)
+	user.RegisterTime = currentTime
+	_, err := Engine.Where("id=?", id).Cols("verified").Cols("account").Cols("password").Cols("register_time").Update(user)
 	return err
 }
 
 // GetUserList get all the user with given status
-func GetUserList(verify int) []PCUser{
+func GetUserList(verify int) []PCUser {
 	ret := make([]PCUser, 0)
 	err := Engine.Where("verified = ?", verify).Incr("id").Find(&ret)
 	if err != nil {

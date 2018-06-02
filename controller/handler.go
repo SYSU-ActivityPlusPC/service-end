@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"sort"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -559,7 +559,7 @@ func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resBody)
 }
 
-func GetUserListHandler(w http.ResponseWriter, r *http.Request) {
+func GetPCUserDetailHandler(w http.ResponseWriter, r *http.Request) {
 	userID := mux.Vars(r)["id"]
 	intID, err := strconv.Atoi(userID)
 	if err != nil {
@@ -570,8 +570,11 @@ func GetUserListHandler(w http.ResponseWriter, r *http.Request) {
 	if user.ID == -1 {
 		w.WriteHeader(204)
 	}
-	layout := "2006-01-02 15:04"
-	stringTime := user.RegisterTime.Format(layout)
+	var stringTime string
+	if user.RegisterTime != nil {
+		layout := "2006-01-02 15:04"
+		stringTime = user.RegisterTime.Format(layout)
+	}
 	jsonRet := types.PCUserDetailedInfo{user.Name, user.Email, user.Logo, user.Evidence, user.Info, user.Account, stringTime}
 	byteRet, err := json.Marshal(jsonRet)
 	if err != nil {
@@ -600,11 +603,10 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-
 	// Get body message
 	refuseMessage := ""
-	type rejectMsg struct {
-		refuseInfo string
+	type RejectMsg struct {
+		RefuseInfo string
 	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -612,12 +614,12 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	jsonBody := new(rejectMsg)
+	jsonBody := new(RejectMsg)
 	err = json.Unmarshal(body, jsonBody)
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		refuseMessage = jsonBody.refuseInfo
+		refuseMessage = jsonBody.RefuseInfo
 	}
 
 	// Update db, including time, password, account and status
@@ -626,24 +628,34 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(204)
 		return
 	}
-	password := getPassword(strconv.Itoa(user.ID), GeneratePassword(12))
-	err = model.VerifyUser(intID, intVerify, user.Email, password, time.Now())
+	if user.Verified == intVerify {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	var password string
+	if intVerify == 1 {
+		password = getPassword(strconv.Itoa(user.ID), GeneratePassword(12))
+		now := time.Now()
+		err = model.VerifyUser(intID, intVerify, user.Email, password, &now)
+	} else {
+		err = model.VerifyUser(intID, intVerify, "", "", nil)
+	}
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(204)
 		return
 	}
 	// Send message to the mq
-	subject := "恭喜，您的注册请求已通过"
+	subject := "中大活动: 恭喜，您的账号注册请求被已通过"
 	if intVerify == 0 {
-		subject = "很抱歉，您的注册请求未被通过"
+		subject = "中大活动: 很抱歉，您的账号注册请求未被通过"
 	}
 	content := refuseMessage
 	if intVerify == 1 {
-		content = fmt.Sprintf("您的登录账户信息为: %s\r\n您的登录密码为:%s\r\n感谢您使用中大活动", user.Email, password)
+		content = fmt.Sprintf("您的登录账户信息为: %s<br />您的登录密码为: %s<br />感谢您使用中大活动", user.Email, password)
 	}
 	msg := types.EmailContent{"admin@sysuactivity.com", user.Email, subject, content}
-	byteContent, err := json.Marshal(msg)
+	byteContent, err := json.Marshal(&msg)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(500)
@@ -667,7 +679,7 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type pcuserList struct {
-		content []types.PCUserListInfo
+		Content []types.PCUserListInfo `json:"content"`
 	}
 
 	// Get user list from the db
@@ -684,8 +696,11 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for _, v := range userList {
-			layout := "2006-01-02 15:04"
-			stringTime := v.RegisterTime.Format(layout)
+			var stringTime string
+			if v.RegisterTime != nil {
+				layout := "2006-01-02 15:04"
+				stringTime = v.RegisterTime.Format(layout)
+			}
 			tmp := types.PCUserListInfo{v.ID, v.Name, v.Logo, v.Verified, stringTime}
 			retContent = append(retContent, tmp)
 		}
@@ -705,15 +720,18 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 		// Sort list
 		sort.Sort(model.SortablePCUserList(userList))
 		for _, v := range userList {
-			layout := "2006-01-02 15:04"
-			stringTime := v.RegisterTime.Format(layout)
+			var stringTime string
+			if v.RegisterTime != nil {
+				layout := "2006-01-02 15:04"
+				stringTime = v.RegisterTime.Format(layout)
+			}
 			tmp := types.PCUserListInfo{v.ID, v.Name, v.Logo, v.Verified, stringTime}
 			retContent = append(retContent, tmp)
 		}
 	}
 	// Write content back to the response
 	jsonRet := pcuserList{retContent}
-	byteRet, err := json.Marshal(jsonRet)
+	byteRet, err := json.Marshal(&jsonRet)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(500)
