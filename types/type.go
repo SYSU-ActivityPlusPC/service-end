@@ -115,7 +115,7 @@ type MessageIntroduction struct {
 	ID 		 int    `json:"id"`
 	Subject  string `json:"subject"`
 	Body 	 string `json:"body"`
-	PubTime  int64  `json:"pubTime"`
+	PubTime  string  `json:"pubTime"`
 	SendTo []string  `json:"sendTo"`
 }
 

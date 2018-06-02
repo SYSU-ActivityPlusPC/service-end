@@ -36,6 +36,14 @@ func AddMessage(messageInfo types.MessageInfo) (int, error) {
 	return 0, nil
 }
 
+// GetMessageInfo return wanted message detail information which is given by id
+func GetMessageInfo(id int) (bool, Message) {
+	var message Message
+
+	ok, _ := Engine.ID(id).Get(&message)
+	return ok, message
+}
+
 // GetMessageList return wanted message list with given page number
 func GetMessageList(pageNum int) []Message {
 	messageList := make([]Message, 0)
@@ -68,6 +76,18 @@ func GetMessageSendToList(messageId int) ([]string, error) {
 		clubNameList = append(clubNameList, clubName)
 	}
 	return clubNameList, nil
+}
+
+// DeleteMessage remove an activity according to the id
+func DeleteMessage(id int) (int, error) {
+	affected, err := Engine.Id(id).Delete(&Message{})
+	if err != nil {
+		return 0, err
+	}
+	if affected == 0 {
+		fmt.Println("Failed to delete an message")
+	}
+	return int(affected), nil
 }
 
 // AddActivity insert a activity into the db

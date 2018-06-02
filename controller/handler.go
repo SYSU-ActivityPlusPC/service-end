@@ -46,20 +46,20 @@ func AddMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-// DeleteMessageHandler remove activity with given id
+// DeleteMessageHandler remove message with given id
 func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
-	actid := mux.Vars(r)["actId"]
-	if len(actid) <= 0 {
+	id := mux.Vars(r)["id"]
+	if len(id) <= 0 {
 		w.WriteHeader(400)
 		return
 	}
-	intActID, err := strconv.Atoi(actid)
-	if err != nil || intActID <= 0 {
+	intId, err := strconv.Atoi(id)
+	if err != nil || intId <= 0 {
 		w.WriteHeader(400)
 		return
 	}
 
-	_, err = model.DeleteActivity(intActID)
+	_, err = model.DeleteMessage(intId)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -101,11 +101,12 @@ func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			layout := "2006-01-02 15:04"
 			tmp := types.MessageIntroduction{
 				ID:              messageList[i].ID,
 				Subject:         messageList[i].Subject,
 				Body:       	 messageList[i].Body,
-				PubTime:         messageList[i].PubTime.UnixNano() / int64(time.Millisecond),
+				PubTime:         messageList[i].PubTime.Format(layout),
 				SendTo:			 sendToList,
 			}
 			infoArr = append(infoArr, tmp)
@@ -131,7 +132,7 @@ func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ShowMessageDetailHander return required activity details with given activity id
+// ShowMessageDetailHander return required message details with given message id
 func ShowMessageDetailHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -144,32 +145,24 @@ func ShowMessageDetailHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Judge if the passed param is valid
 	if intID > 0 {
-		ok, activityInfo := model.GetActivityInfo(intID)
+		ok, messageInfo := model.GetMessageInfo(intID)
 		if ok {
+			sendToList, err := model.GetMessageSendToList(intID)
+			if err != nil {
+				fmt.Fprint(os.Stderr, err)
+				w.WriteHeader(500)
+				return
+			}
+
 			layout := "2006-01-02 15:04"
 			// Convert to ms
-			retMsg := types.ActivityInfo{
-				ID:              activityInfo.ID,
-				Name:            activityInfo.Name,
-				StartTime:       activityInfo.StartTime.Format(layout),
-				EndTime:         activityInfo.EndTime.Format(layout),
-				Campus:          activityInfo.Campus,
-				Location:        activityInfo.Location,
-				EnrollCondition: activityInfo.EnrollCondition,
-				Sponsor:         activityInfo.Sponsor,
-				Type:            activityInfo.Type,
-				PubStartTime:    activityInfo.PubStartTime.Format(layout),
-				PubEndTime:      activityInfo.PubEndTime.Format(layout),
-				Detail:          activityInfo.Detail,
-				Reward:          activityInfo.Reward,
-				Introduction:    activityInfo.Introduction,
-				Requirement:     activityInfo.Requirement,
-				Poster:          activityInfo.Poster,
-				Qrcode:          activityInfo.Qrcode,
-				Email:           activityInfo.Email,
-				Verified:        activityInfo.Verified,
+			retMsg := types.MessageIntroduction{
+				ID:              messageInfo.ID,
+				Subject:         messageInfo.Subject,
+				Body:       	 messageInfo.Body,
+				PubTime:         messageInfo.PubTime.Format(layout),
+				SendTo:			 sendToList,
 			}
-			retMsg.Poster = GetPoster(retMsg.Poster, retMsg.Type)
 			stringInfo, err := json.Marshal(retMsg)
 			if err != nil {
 				fmt.Fprint(os.Stderr, err)
