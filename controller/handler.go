@@ -450,7 +450,7 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(204)
 		return
 	}
-	if user.Verified == 1 {
+	if user.Verified == intVerify {
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
