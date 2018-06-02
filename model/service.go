@@ -36,6 +36,40 @@ func AddMessage(messageInfo types.MessageInfo) (int, error) {
 	return 0, nil
 }
 
+// GetMessageList return wanted message list with given page number
+func GetMessageList(pageNum int) []Message {
+	messageList := make([]Message, 0)
+	Engine.Desc("id").Find(&messageList)
+	from := pageNum * 10
+	if from >= len(messageList) {
+		return []Message{}
+	}
+	if from+10 > len(messageList) {
+		return messageList[from:]
+	}
+	return messageList[from : from+10]
+}
+
+// GetMessageSendToList return []string which is the name list of sendto clubs
+func GetMessageSendToList(messageId int) ([]string, error) {
+	messagePCUserList := make([]MessagePCUser, 0)
+	err := Engine.Where("message_id=?", messageId).Find(&messagePCUserList)
+	if err != nil {
+		return []string{}, err
+	}
+
+	clubNameList := make([]string, 0)
+	for _, v := range messagePCUserList {
+		var clubName string
+		_, err := Engine.Table("pcuser").Where("id=?", v.PCUserId).Cols("name").Get(&clubName)
+		if err != nil {
+			return []string{}, err
+		}
+		clubNameList = append(clubNameList, clubName)
+	}
+	return clubNameList, nil
+}
+
 // AddActivity insert a activity into the db
 func AddActivity(activityInfo types.ActivityInfo, id int) (int, error) {
 	layout := "2006-01-02 15:04"

@@ -109,3 +109,17 @@ type MessageInfo struct {
 	Body 	 string `json:"body"`
 	PCUserId []int  `json:"pcuserId"`
 }
+
+// MessageIntroduction
+type MessageIntroduction struct {
+	ID 		 int    `json:"id"`
+	Subject  string `json:"subject"`
+	Body 	 string `json:"body"`
+	PubTime  int64  `json:"pubTime"`
+	SendTo []string  `json:"sendTo"`
+}
+
+// MessageList defines the return format
+type MessageList struct {
+	Content []MessageIntroduction `json:"content"`
+}

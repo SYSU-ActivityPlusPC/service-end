@@ -19,7 +19,7 @@ import (
 	"github.com/sysu-activitypluspc/service-end/types"
 )
 
-// AddMessageHandler add activity to the db
+// AddMessageHandler add message to the db
 func AddMessageHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
@@ -67,7 +67,7 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-// ShowMessagesListHandler display activity with given page number and verify status
+// ShowMessagesListHandler display message with given page number
 func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 	// Get required page number, if not given, use the default value 1
 	r.ParseForm()
@@ -77,21 +77,9 @@ func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		pageNumber = "1"
 	}
-	var verified string
-	if len(r.Form["verify"]) > 0 {
-		verified = r.Form["verify"][0]
-	} else {
-		w.WriteHeader(400)
-		return
-	}
+
 	intPageNum, err := strconv.Atoi(pageNumber)
 	if err != nil {
-		fmt.Fprint(os.Stderr, err)
-		w.WriteHeader(400)
-		return
-	}
-	intVerified, err := strconv.Atoi(verified)
-	if err != nil || (intVerified != 0 && intVerified != 1) {
 		fmt.Fprint(os.Stderr, err)
 		w.WriteHeader(400)
 		return
@@ -99,28 +87,30 @@ func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Judge if the passed param is valid
 	if intPageNum > 0 {
-		// Get activity list
-		activityList := model.GetActivityList(intPageNum-1, intVerified)
+		// Get message list
+		messageList := model.GetMessageList(intPageNum-1)
 
+		// Find SendTo club
 		// Change each element to the format that we need
-		infoArr := make([]types.ActivityIntroduction, 0)
-		for i := 0; i < len(activityList); i++ {
-			tmp := types.ActivityIntroduction{
-				ID:              activityList[i].ID,
-				Name:            activityList[i].Name,
-				StartTime:       activityList[i].StartTime.UnixNano() / int64(time.Millisecond),
-				EndTime:         activityList[i].EndTime.UnixNano() / int64(time.Millisecond),
-				Campus:          activityList[i].Campus,
-				EnrollCondition: activityList[i].EnrollCondition,
-				Sponsor:         activityList[i].Sponsor,
-				PubStartTime:    activityList[i].PubStartTime.UnixNano() / int64(time.Millisecond),
-				PubEndTime:      activityList[i].PubEndTime.UnixNano() / int64(time.Millisecond),
-				Verified:        activityList[i].Verified,
-				Type:            activityList[i].Type,
+		infoArr := make([]types.MessageIntroduction, 0)
+		for i := 0; i < len(messageList); i++ {
+			sendToList, err := model.GetMessageSendToList(messageList[i].ID)
+			if err != nil {
+				fmt.Fprint(os.Stderr, err)
+				w.WriteHeader(500)
+				return
+			}
+
+			tmp := types.MessageIntroduction{
+				ID:              messageList[i].ID,
+				Subject:         messageList[i].Subject,
+				Body:       	 messageList[i].Body,
+				PubTime:         messageList[i].PubTime.UnixNano() / int64(time.Millisecond),
+				SendTo:			 sendToList,
 			}
 			infoArr = append(infoArr, tmp)
 		}
-		returnList := types.ActivityList{
+		returnList := types.MessageList{
 			Content: infoArr,
 		}
 
@@ -131,7 +121,7 @@ func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(500)
 			return
 		}
-		if len(activityList) <= 0 {
+		if len(messageList) <= 0 {
 			w.WriteHeader(204)
 		} else {
 			w.Write(stringList)
