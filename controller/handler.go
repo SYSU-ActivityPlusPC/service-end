@@ -23,23 +23,21 @@ import (
 func AddMessageHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
-	stringID := r.Header.Get("X-ID")
-	// Handle anonymous user
-	if len(stringID) == 0 {
-		stringID = "-1"
-	}
-	ID, err := strconv.Atoi(stringID)
-	if err != nil {
-		w.WriteHeader(500)
-		return
-	}
 
-	jsonBody := new(types.ActivityInfo)
+	// Only manager can add message
+	// stringID := r.Header.Get("X-ID")
+	// ID, err := strconv.Atoi(stringID)
+	// if err != nil {
+	// 	w.WriteHeader(500)
+	// 	return
+	// }
+
+	jsonBody := new(types.MessageInfo)
 	err = json.Unmarshal(body, jsonBody)
 	if err != nil {
 		w.WriteHeader(400)
 	}
-	_, err = model.AddActivity(*jsonBody, ID)
+	_, err = model.AddMessage(*jsonBody)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(500)
@@ -144,7 +142,7 @@ func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // ShowMessageDetailHander return required activity details with given activity id
-func ShowMessageDetailHander(w http.ResponseWriter, r *http.Request) {
+func ShowMessageDetailHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	intID, err := strconv.Atoi(id)

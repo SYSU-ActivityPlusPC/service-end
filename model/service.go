@@ -7,6 +7,35 @@ import (
 	"github.com/sysu-activitypluspc/service-end/types"
 )
 
+// AddMessage insert a message and message_pcuser into the db
+func AddMessage(messageInfo types.MessageInfo) (int, error) {
+	// add message
+	currentTime := time.Now()
+	dbMessage := Message{
+		Subject: messageInfo.Subject,
+		Body: 	messageInfo.Body,
+		PubTime: &currentTime,
+	}
+	_, err := Engine.InsertOne(&dbMessage)
+	if err != nil {
+		return -1, err
+	}
+	fmt.Println(dbMessage.ID)
+
+	// add message_pcuser
+	for _, v := range messageInfo.PCUserId {
+		dbMessagePCUser := MessagePCUser{
+			PCUserId:  v,
+			MessageId: dbMessage.ID,
+		}
+		_, err := Engine.InsertOne(&dbMessagePCUser)
+		if err != nil {
+			return -1, err
+		}
+	}
+	return 0, nil
+}
+
 // AddActivity insert a activity into the db
 func AddActivity(activityInfo types.ActivityInfo, id int) (int, error) {
 	layout := "2006-01-02 15:04"

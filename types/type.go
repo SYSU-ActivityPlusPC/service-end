@@ -101,3 +101,11 @@ type PCUserListInfo struct {
 	Verified     int    `json:"verified"`
 	RegisterTime string `json:"register_time"`
 }
+
+// Message info passed from front-end
+type MessageInfo struct {
+	ID 		 int    `json:"id"`
+	Subject  string `json:"subject"`
+	Body 	 string `json:"body"`
+	PCUserId []int  `json:"pcuserId"`
+}

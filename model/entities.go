@@ -43,6 +43,20 @@ type PCUser struct {
 	RegisterTime *time.Time
 }
 
+// Message struct
+type Message struct {
+	ID 		int    `xorm:"pk autoincr 'id'"`
+	Subject string `xorm:"varchar(60) notnull"`
+	Body 	string `xorm:"varchar(150) notnull"`
+	PubTime *time.Time
+}
+
+// Message_Pcuser struct 
+type MessagePCUser struct {
+	PCUserId  int `xorm:"int 'pcuser_id'"`
+	MessageId int `xorm:"int 'message_id'"`
+}
+
 // SortablePCUserList implement sort interface
 type SortablePCUserList []PCUser
 
@@ -53,6 +67,14 @@ func (u ActivityInfo) TableName() string {
 
 func (u PCUser) TableName() string {
 	return "pcuser"
+}
+
+func (u Message) TableName() string {
+	return "message"
+}
+
+func (u MessagePCUser) TableName() string {
+	return "message_pcuser"
 }
 
 // Sort interface for list
