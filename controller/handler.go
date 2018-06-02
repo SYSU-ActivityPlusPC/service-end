@@ -626,7 +626,8 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(204)
 		return
 	}
-	// Send message to the mq
+	w.WriteHeader(200)
+	// Send message to the user
 	subject := "中大活动: 恭喜，您的账号注册请求被已通过"
 	if intVerify == 0 {
 		subject = "中大活动: 很抱歉，您的账号注册请求未被通过"
@@ -636,18 +637,14 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		content = fmt.Sprintf("您的登录账户信息为: %s<br />您的登录密码为: %s<br />感谢您使用中大活动", user.Email, password)
 	}
 	msg := types.EmailContent{"admin@sysuactivity.com", user.Email, subject, content}
-	byteContent, err := json.Marshal(&msg)
-	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(500)
-		return
-	}
-	ok := WriteMessageQueue("email", byteContent)
-	if ok {
-		w.WriteHeader(200)
-	} else {
-		w.WriteHeader(500)
-	}
+	go SendMail(msg.From, msg.To, msg.Content, msg.Subject)
+	// byteContent, err := json.Marshal(&msg)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	w.WriteHeader(500)
+	// 	return
+	// }
+	// WriteMessageQueue("email", byteContent)
 }
 
 func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
