@@ -616,7 +616,7 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var password string
 	if intVerify == 1 {
-		loc, _:= time.LoadLocation("Asia/Chongqing")
+		loc := time.FixedZone("Beijing", int(time.Hour * 8 / time.Second))
 		now := time.Now().In(loc)
 		password = GeneratePassword(12)
 		err = model.VerifyUser(intID, intVerify, user.Email, getPassword(strconv.Itoa(user.ID), password), &now)
@@ -629,6 +629,7 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(200)
+	return
 	// Send message to the user
 	subject := "中大活动: 恭喜，您的账号注册请求被已通过"
 	if intVerify == 2 {
