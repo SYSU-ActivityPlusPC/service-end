@@ -629,7 +629,6 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(200)
-	return
 	// Send message to the user
 	subject := "中大活动: 恭喜，您的账号注册请求被已通过"
 	if intVerify == 2 {
