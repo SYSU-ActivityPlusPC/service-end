@@ -616,8 +616,7 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var password string
 	if intVerify == 1 {
-		loc := time.FixedZone("Beijing", int(time.Hour * 8 / time.Second))
-		now := time.Now().In(loc)
+		now := time.Now()
 		password = GeneratePassword(12)
 		err = model.VerifyUser(intID, intVerify, user.Email, getPassword(strconv.Itoa(user.ID), password), &now)
 	} else {
