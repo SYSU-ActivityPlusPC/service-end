@@ -616,7 +616,7 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var password string
 	if intVerify == 1 {
-		now := time.Now()
+		now := time.Now().Add(time.Hour * 8)
 		password = GeneratePassword(12)
 		err = model.VerifyUser(intID, intVerify, user.Email, getPassword(strconv.Itoa(user.ID), password), &now)
 	} else {
