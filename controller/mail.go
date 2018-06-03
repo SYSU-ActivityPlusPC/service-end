@@ -21,7 +21,7 @@ func SendMail(send string, to string, content string, sub string) error {
 	m.SetBody("text/html", content)
 
 	// Dial and send email
-	d := gomail.NewDialer("smtp.exmail.qq.com", 25, send, password)
+	d := gomail.NewDialer("smtp.exmail.qq.com", 587, send, password)
 	if err := d.DialAndSend(m); err != nil {
 		fmt.Println(err)
 		return err
