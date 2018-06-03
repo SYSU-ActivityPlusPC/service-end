@@ -8,7 +8,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -88,7 +87,7 @@ func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 	// Judge if the passed param is valid
 	if intPageNum > 0 {
 		// Get message list
-		messageList := model.GetMessageList(intPageNum-1)
+		messageList := model.GetMessageList(intPageNum - 1)
 
 		// Find SendTo club
 		// Change each element to the format that we need
@@ -103,11 +102,11 @@ func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 
 			layout := "2006-01-02 15:04"
 			tmp := types.MessageIntroduction{
-				ID:              messageList[i].ID,
-				Subject:         messageList[i].Subject,
-				Body:       	 messageList[i].Body,
-				PubTime:         messageList[i].PubTime.Format(layout),
-				SendTo:			 sendToList,
+				ID:      messageList[i].ID,
+				Subject: messageList[i].Subject,
+				Body:    messageList[i].Body,
+				PubTime: messageList[i].PubTime.Format(layout),
+				SendTo:  sendToList,
 			}
 			infoArr = append(infoArr, tmp)
 		}
@@ -157,11 +156,11 @@ func ShowMessageDetailHandler(w http.ResponseWriter, r *http.Request) {
 			layout := "2006-01-02 15:04"
 			// Convert to ms
 			retMsg := types.MessageIntroduction{
-				ID:              messageInfo.ID,
-				Subject:         messageInfo.Subject,
-				Body:       	 messageInfo.Body,
-				PubTime:         messageInfo.PubTime.Format(layout),
-				SendTo:			 sendToList,
+				ID:      messageInfo.ID,
+				Subject: messageInfo.Subject,
+				Body:    messageInfo.Body,
+				PubTime: messageInfo.PubTime.Format(layout),
+				SendTo:  sendToList,
 			}
 			stringInfo, err := json.Marshal(retMsg)
 			if err != nil {
@@ -433,6 +432,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
 	// Check user account and password
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
@@ -491,6 +491,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if isEmailExist := CheckIfEmailExist(jsonBody.Email); isEmailExist == true {
 		w.WriteHeader(400)
+		return
 	}
 	ok := model.AddUser(*jsonBody)
 	if ok {
@@ -580,7 +581,7 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	if intVerify != 0 && intVerify != 1 {
+	if intVerify != 2 && intVerify != 1 {
 		w.WriteHeader(400)
 		return
 	}
@@ -615,9 +616,9 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var password string
 	if intVerify == 1 {
-		password = getPassword(strconv.Itoa(user.ID), GeneratePassword(12))
 		now := time.Now()
-		err = model.VerifyUser(intID, intVerify, user.Email, password, &now)
+		password = GeneratePassword(12)
+		err = model.VerifyUser(intID, intVerify, user.Email, getPassword(strconv.Itoa(user.ID), password), &now)
 	} else {
 		err = model.VerifyUser(intID, intVerify, "", "", nil)
 	}
@@ -629,10 +630,10 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	// Send message to the user
 	subject := "中大活动: 恭喜，您的账号注册请求被已通过"
-	if intVerify == 0 {
+	if intVerify == 2 {
 		subject = "中大活动: 很抱歉，您的账号注册请求未被通过"
 	}
-	content := refuseMessage
+	content := fmt.Sprintf("您的账户由于%s<br />导致未通过审核", refuseMessage)
 	if intVerify == 1 {
 		content = fmt.Sprintf("您的登录账户信息为: %s<br />您的登录密码为: %s<br />感谢您使用中大活动", user.Email, password)
 	}
@@ -684,8 +685,8 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Get all of the user
-		userList := model.GetUserList(1)
-		tmp := model.GetUserList(0)
+		userList := model.GetUserList(0)
+		tmp := model.GetUserList(2)
 		if userList == nil || tmp == nil {
 			w.WriteHeader(500)
 			return
@@ -695,8 +696,6 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(204)
 			return
 		}
-		// Sort list
-		sort.Sort(model.SortablePCUserList(userList))
 		for _, v := range userList {
 			var stringTime string
 			if v.RegisterTime != nil {

@@ -270,9 +270,9 @@ func CheckPCUser(username string) bool {
 }
 
 // GetUserInfo returns user information with given username
-func GetUserInfo(username string) PCUser {
+func GetUserInfo(account string) PCUser {
 	var user PCUser
-	_, err := Engine.Where("account = ?", username).Get(&user)
+	_, err := Engine.Where("account = ?", account).Get(&user)
 	if err != nil {
 		fmt.Println(err)
 		user.ID = -1

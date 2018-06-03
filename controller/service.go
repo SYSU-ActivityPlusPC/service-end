@@ -126,8 +126,10 @@ func CheckIfEmailExist(email string) bool {
 
 // GeneratePassword generate password
 func GeneratePassword(length int) string {
-	res, err := password.Generate(length, 1+rand.Int()%(length/2), 10, false, false)
+	digitNum := 1 + rand.Int()%(length/2)
+	res, err := password.Generate(length, digitNum, 0, false, false)
 	if err != nil {
+		fmt.Println(err)
 		return "password"
 	}
 	return res

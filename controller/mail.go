@@ -10,6 +10,7 @@ import (
 
 // SendMail send mail according to the content
 func SendMail(send string, to string, content string, sub string) error {
+	fmt.Println("Begin to send mail")
 	// Get receivers and password
 	toArray := strings.Split(to, ";")
 	password := os.Getenv("ADMIN_MAIL_PASS")
