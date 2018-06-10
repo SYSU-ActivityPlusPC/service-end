@@ -282,6 +282,92 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// ShowActivitiesListByClubHandler display activity with given page number, only club use
+func ShowActivitiesListByClubHandler(w http.ResponseWriter, r *http.Request) {
+	clubId := mux.Vars(r)["clubId"]
+	// Get required page number, if not given, use the default value 1
+	r.ParseForm()
+	var pageNumber string
+	if len(r.Form["page"]) > 0 {
+		pageNumber = r.Form["page"][0]
+	} else {
+		pageNumber = "1"
+	}
+	intPageNum, err := strconv.Atoi(pageNumber)
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+		w.WriteHeader(400)
+		return
+	}
+	intClubId, err := strconv.Atoi(clubId)
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+		w.WriteHeader(400)
+		return
+	}
+
+	// Judge if the passed param is valid
+	if intPageNum > 0 {
+		// Get club's all activities
+		activityList := model.GetActivityListByClub(intPageNum-1, intClubId)
+
+		// Change each element to the format that we need
+		infoArr := make([]types.ActivityIntroductionForClub, 0)
+		for i := 0; i < len(activityList); i++ {
+			var actType int
+			now := time.Now().Add(time.Hour * 8)
+			layout := "2006-01-02 15:04"
+
+			if activityList[i].Verified == 2 {
+				continue
+			} else if activityList[i].Verified == 0 {
+				actType = 0
+			} else if activityList[i].Verified == 1 && activityList[i].PubEndTime.After(now) {
+				actType = 1
+			} else { 
+				actType = 2
+			}
+
+			// pageViews := GetPageViewsByActId(activityList[i].ID)
+			pageViews := 0
+			registerNum := 0
+			// activity registration is on or has done
+			if activityList[i].CanEnrolled == 1 || activityList[i].CanEnrolled == 2 {
+				registerNum = model.GetRegisterNumByActId(activityList[i].ID)
+			}
+			
+			tmp := types.ActivityIntroductionForClub{
+				ID:              	activityList[i].ID,
+				Name:            	activityList[i].Name,
+				PubStartTime:       activityList[i].PubStartTime.Format(layout),
+				PageViews:          pageViews,
+				RegisterNum:        registerNum,
+				Type: 				actType,
+				CanEnrolled:        activityList[i].CanEnrolled,
+			}
+			infoArr = append(infoArr, tmp)
+		}
+		returnList := types.ActivityListForClub{
+			Content: infoArr,
+		}
+
+		// Transfer it to json
+		stringList, err := json.Marshal(returnList)
+		if err != nil {
+			fmt.Fprint(os.Stderr, err)
+			w.WriteHeader(500)
+			return
+		}
+		if len(activityList) <= 0 {
+			w.WriteHeader(204)
+		} else {
+			w.Write(stringList)
+		}
+	} else {
+		w.WriteHeader(400)
+	}
+}
+
 // ShowActivitiesListHandler display activity with given page number and verify status
 func ShowActivitiesListHandler(w http.ResponseWriter, r *http.Request) {
 	// Get required page number, if not given, use the default value 1

@@ -57,6 +57,15 @@ type MessagePCUser struct {
 	MessageId int `xorm:"int 'message_id'"`
 }
 
+type ActApplyInfo struct {
+	ActId     int    `xorm:"int notnull pk 'actid'"`
+	UserId    string `xorm:"varchar(64) notnull pk 'userid'"`
+	UserName  string `xorm:"varchar(64) username"`
+	StudentId string `xorm:"varchar(64) studentid"`
+	Phone     string `xorm:"varchar(20)"`
+	School    string `xorm:"varchar(100)"`
+}
+
 // SortablePCUserList implement sort interface
 type SortablePCUserList []PCUser
 
@@ -75,6 +84,10 @@ func (u Message) TableName() string {
 
 func (u MessagePCUser) TableName() string {
 	return "message_pcuser"
+}
+
+func (u ActApplyInfo) TableName() string {
+	return "actapply"
 }
 
 // Sort interface for list

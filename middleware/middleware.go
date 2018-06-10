@@ -1,10 +1,13 @@
 package middleware
 
 import (
+	"github.com/gorilla/mux"
+	"os"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
-
+	
 	"github.com/sysu-activitypluspc/service-end/controller"
 	"github.com/sysu-activitypluspc/service-end/model"
 )
@@ -27,9 +30,11 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 	}
 	// Read authorization from header
 	role := 0
+	userId := 0
 	r.Header.Del("X-Role")
 	r.Header.Del("X-Account")
 	auth := r.Header.Get("Authorization")
+	
 	// Check user identity
 	if len(auth) <= 0 {
 		r.Header.Set("X-Role", "0")
@@ -42,8 +47,10 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 			user := model.GetUserInfo(name)
 			if user.ID <= 0 {
 				r.Header.Set("X-Role", "0")
+				userId = -1
 			} else {
 				isAdmin := controller.CheckIsAdmin(name)
+				userId = user.ID
 				if isAdmin {
 					role = 2
 					r.Header.Set("X-Role", "2")
@@ -84,6 +91,23 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				rw.WriteHeader(401)
 				return
 			} 
+			if strings.HasPrefix(path, "/act/{clubId}/list") {
+				// judge whether clubId and token match
+				clubId := mux.Vars(r)["clubId"]
+				intClubId, err := strconv.Atoi(clubId)
+				if err != nil {
+					fmt.Fprint(os.Stderr, err)
+					rw.WriteHeader(400)
+					return
+				}
+
+				if userId == intClubId {
+					next(rw, r)
+				} else {
+					rw.WriteHeader(401)
+					return
+				}
+			}
 		}
 		// Refuse all the pcusers api
 		if path == "/pcusers" || strings.HasPrefix(path, "/pcusers/") {
@@ -92,6 +116,13 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				return
 			}
 		}
+		// Refuse super manager to access this url
+		// if role == 2 {
+		// 	if strings.HasPrefix(path, "/act/club") {
+		// 		rw.WriteHeader(401)
+		// 		return
+		// 	}
+		// }
 	}
 	next(rw, r)
 }

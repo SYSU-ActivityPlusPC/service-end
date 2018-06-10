@@ -123,3 +123,19 @@ type MessageIntroduction struct {
 type MessageList struct {
 	Content []MessageIntroduction `json:"content"`
 }
+
+// ActivityIntroductionForClub include required information in activity list page
+type ActivityIntroductionForClub struct {  
+	ID              int    `json:"id"`
+	Name            string `json:"name"`
+	PubStartTime    string  `json:"pubStartTime"`
+	PageViews       int    `json:"pageViews"`
+	RegisterNum     int    `json:"registerNum"`
+	Type            int    `json:"type"`
+	CanEnrolled     int    `json:"canEnrolled"`
+}
+
+// ActivityListForClub defines the return format
+type ActivityListForClub struct {
+	Content []ActivityIntroductionForClub `json:"content"`
+}

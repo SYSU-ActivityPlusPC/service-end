@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strconv"
 	"fmt"
 	"time"
 
@@ -253,6 +254,28 @@ func GetActivityList(pageNum int, verified int) []ActivityInfo {
 		return activityList[from:]
 	}
 	return activityList[from : from+10]
+}
+
+// GetActivityListByClub return wanted activity list with given page number
+func GetActivityListByClub(pageNum int, clubId int) []ActivityInfo {
+	activityList := make([]ActivityInfo, 0)
+	// Search clubId's activity
+	Engine.Desc("id").Where("pcuser_id = ?", clubId).Find(&activityList)
+	from := pageNum * 10
+	if from >= len(activityList) {
+		return []ActivityInfo{}
+	}
+	if from+10 > len(activityList) {
+		return activityList[from:]
+	}
+	return activityList[from : from+10]
+}
+
+func GetRegisterNumByActId(actId int) int {
+	counts, _ := Engine.Where("actid = ?", actId).Count(&ActApplyInfo{})
+	s := strconv.FormatInt(counts, 10)
+	result, _ := strconv.Atoi(s)
+	return result
 }
 
 // GetActivityInfo return wanted activity detail information which is given by id
