@@ -256,6 +256,11 @@ func GetActivityList(pageNum int, verified int) []ActivityInfo {
 	return activityList[from : from+10]
 }
 
+func IsPublishedByClub(clubId int, intActId int) (bool, error) {
+	has, err := Engine.Where("pcuser_id = ? && id = ?", clubId, intActId).Exist(&ActivityInfo{})
+	return has, err
+}
+
 // GetActStatusNumByClub return the number of activity status
 func GetActStatusNumByClub(clubId int) (int, int, int) {
 	activityList := make([]ActivityInfo, 0)

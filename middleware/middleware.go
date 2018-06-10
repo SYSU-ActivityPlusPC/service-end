@@ -90,6 +90,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				rw.WriteHeader(401)
 				return
 			} 
+			// for "/act/{clubId}/list" or "/act/{clubId}/status"
 			if strings.HasPrefix(path, "/act/") && (strings.HasSuffix(path, "/list") || strings.HasSuffix(path, "/status")) {
 				// judge whether clubId and token match
 				pathArr := strings.Split(path, "/")
@@ -102,6 +103,26 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				}
 
 				if userId == intClubId {
+					next(rw, r)
+					return
+				} else {
+					rw.WriteHeader(401)
+					return
+				}
+			}
+			
+			if strings.HasPrefix(path, "/act/") && r.Method == "POST" {
+				pathArr := strings.Split(path, "/")
+				actId := pathArr[2]
+				intActId, err := strconv.Atoi(actId)
+				if err != nil {
+					fmt.Fprint(os.Stderr, err)
+					rw.WriteHeader(400)
+					return
+				}
+
+				yes, _ := model.IsPublishedByClub(userId, intActId)
+				if yes {
 					next(rw, r)
 					return
 				} else {
