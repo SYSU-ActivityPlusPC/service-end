@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"github.com/gorilla/mux"
 	"os"
 	"fmt"
 	"net/http"
@@ -91,9 +90,10 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				rw.WriteHeader(401)
 				return
 			} 
-			if strings.HasPrefix(path, "/act/{clubId}/list") {
+			if strings.HasPrefix(path, "/act/") || strings.HasSuffix(path, "/list") {
 				// judge whether clubId and token match
-				clubId := mux.Vars(r)["clubId"]
+				pathArr := strings.Split(path, "/")
+				clubId := pathArr[2]
 				intClubId, err := strconv.Atoi(clubId)
 				if err != nil {
 					fmt.Fprint(os.Stderr, err)
