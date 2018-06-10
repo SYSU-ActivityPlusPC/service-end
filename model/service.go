@@ -256,6 +256,27 @@ func GetActivityList(pageNum int, verified int) []ActivityInfo {
 	return activityList[from : from+10]
 }
 
+// GetActStatusNumByClub return the number of activity status
+func GetActStatusNumByClub(clubId int) (int, int, int) {
+	activityList := make([]ActivityInfo, 0)
+	var auditNum, ongoingNum, overNum int = 0, 0, 0
+	now := time.Now().Add(time.Hour * 8)
+	// Search clubId's activity
+	Engine.Desc("id").Where("pcuser_id = ?", clubId).Find(&activityList)
+	for i := 0; i < len(activityList); i++ {
+		if activityList[i].Verified == 2 {
+			continue
+		} else if activityList[i].Verified == 0 {
+			auditNum++
+		} else if activityList[i].Verified == 1 && activityList[i].PubEndTime.After(now) {
+			ongoingNum++
+		} else { 
+			overNum++
+		}
+	}
+	return auditNum, ongoingNum, overNum
+}
+
 // GetActivityListByClub return wanted activity list with given page number
 func GetActivityListByClub(pageNum int, clubId int) []ActivityInfo {
 	activityList := make([]ActivityInfo, 0)

@@ -139,3 +139,9 @@ type ActivityIntroductionForClub struct {
 type ActivityListForClub struct {
 	Content []ActivityIntroductionForClub `json:"content"`
 }
+
+type NumOfActStatus struct {
+	AuditNum        int   `json:"auditNum"`
+	OngoingNum      int   `json:"ongoingNum"`
+	OverNum         int   `json:"overNum"`
+}

@@ -90,7 +90,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				rw.WriteHeader(401)
 				return
 			} 
-			if strings.HasPrefix(path, "/act/") || strings.HasSuffix(path, "/list") {
+			if strings.HasPrefix(path, "/act/") && (strings.HasSuffix(path, "/list") || strings.HasSuffix(path, "/status")) {
 				// judge whether clubId and token match
 				pathArr := strings.Split(path, "/")
 				clubId := pathArr[2]
@@ -103,6 +103,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 
 				if userId == intClubId {
 					next(rw, r)
+					return
 				} else {
 					rw.WriteHeader(401)
 					return
@@ -116,13 +117,6 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				return
 			}
 		}
-		// Refuse super manager to access this url
-		// if role == 2 {
-		// 	if strings.HasPrefix(path, "/act/club") {
-		// 		rw.WriteHeader(401)
-		// 		return
-		// 	}
-		// }
 	}
 	next(rw, r)
 }

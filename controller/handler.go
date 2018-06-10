@@ -282,6 +282,28 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func GetNumberOfActStatusByClub(w http.ResponseWriter, r *http.Request) {
+	clubId := mux.Vars(r)["clubId"]
+	intClubId, err := strconv.Atoi(clubId)
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+		w.WriteHeader(400)
+		return
+	}
+
+	auditNum, ongoingNum, overNum := model.GetActStatusNumByClub(intClubId)
+
+	tmp := types.NumOfActStatus{auditNum, ongoingNum, overNum}
+	
+	stringList, err := json.Marshal(tmp)
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+		w.WriteHeader(500)
+		return
+	}
+	w.Write(stringList)
+}
+
 // ShowActivitiesListByClubHandler display activity with given page number, only club use
 func ShowActivitiesListByClubHandler(w http.ResponseWriter, r *http.Request) {
 	clubId := mux.Vars(r)["clubId"]

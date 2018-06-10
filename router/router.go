@@ -22,6 +22,7 @@ func GetServer() *negroni.Negroni {
 	act.HandleFunc("", controller.ShowActivitiesListHandler).Methods("GET")
 	act.HandleFunc("/{id}", controller.ShowActivityDetailHandler).Methods("GET")
 	act.HandleFunc("/{clubId}/list", controller.ShowActivitiesListByClubHandler).Methods("GET")
+	act.HandleFunc("/{clubId}/status", controller.GetNumberOfActStatusByClub).Methods("GET")
 
 	session := r.PathPrefix("/session").Subrouter()
 	session.HandleFunc("", controller.LoginHandler).Methods("POST")
