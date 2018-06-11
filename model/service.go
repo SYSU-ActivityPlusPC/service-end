@@ -406,9 +406,9 @@ func GetApplyListByID(id int) []ActApplyInfo{
 	return ret
 }
 
-// TODO: DeleteApplyByID remove apply with given id
+// DeleteApplyByID remove apply with given id
 func DeleteApplyByID(actid int, applyid int) bool{
-	_, err := Engine.Where("actid=?", actid).And("").Delete(&ActApplyInfo{})
+	_, err := Engine.Where("actid=?", actid).And("id=?", applyid).Delete(&ActApplyInfo{})
 	if err != nil {
 		fmt.Println(err)
 		return false

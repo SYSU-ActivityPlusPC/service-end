@@ -45,19 +45,20 @@ type PCUser struct {
 
 // Message struct
 type Message struct {
-	ID 		int    `xorm:"pk autoincr 'id'"`
+	ID      int    `xorm:"pk autoincr 'id'"`
 	Subject string `xorm:"varchar(60) notnull"`
-	Body 	string `xorm:"varchar(150) notnull"`
+	Body    string `xorm:"varchar(150) notnull"`
 	PubTime *time.Time
 }
 
-// Message_Pcuser struct 
+// Message_Pcuser struct
 type MessagePCUser struct {
 	PCUserId  int `xorm:"int 'pcuser_id'"`
 	MessageId int `xorm:"int 'message_id'"`
 }
 
 type ActApplyInfo struct {
+	ID        int    `xorm:"pk autoincr 'id'"`
 	ActId     int    `xorm:"int notnull pk 'actid'"`
 	UserId    string `xorm:"varchar(64) notnull pk 'userid'"`
 	UserName  string `xorm:"varchar(64) username"`
