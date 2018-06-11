@@ -23,6 +23,7 @@ func GetServer() *negroni.Negroni {
 	act.HandleFunc("/{id}", controller.ShowActivityDetailHandler).Methods("GET")
 	act.HandleFunc("/{clubId}/list", controller.ShowActivitiesListByClubHandler).Methods("GET")
 	act.HandleFunc("/{clubId}/status", controller.GetNumberOfActStatusByClub).Methods("GET")
+	act.HandleFunc("/{actid}", controller.CloseActivityApply).Methods("PUT")
 
 	session := r.PathPrefix("/session").Subrouter()
 	session.HandleFunc("", controller.LoginHandler).Methods("POST")
@@ -40,6 +41,11 @@ func GetServer() *negroni.Negroni {
 	message.HandleFunc("/{id}", controller.DeleteMessageHandler).Methods("DELETE")
 	
 	r.HandleFunc("/images", controller.UploadImageHandler).Methods("POST")
+
+	actApply := r.PathPrefix("/actApply").Subrouter()
+	actApply.HandleFunc("", controller.ListActivityApplyHandler).Methods("GET")
+	actApply.HandleFunc("", controller.DeleteActivityApplyHandler).Methods("DELETE")
+	
 
 	s.UseHandler(r)
 	return s

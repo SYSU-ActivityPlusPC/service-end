@@ -104,19 +104,19 @@ type PCUserListInfo struct {
 
 // Message info passed from front-end
 type MessageInfo struct {
-	ID 		 int    `json:"id"`
+	ID       int    `json:"id"`
 	Subject  string `json:"subject"`
-	Body 	 string `json:"body"`
+	Body     string `json:"body"`
 	PCUserId []int  `json:"pcuserId"`
 }
 
 // MessageIntroduction
 type MessageIntroduction struct {
-	ID 		 int    `json:"id"`
-	Subject  string `json:"subject"`
-	Body 	 string `json:"body"`
-	PubTime  string  `json:"pubTime"`
-	SendTo []string  `json:"sendTo"`
+	ID      int      `json:"id"`
+	Subject string   `json:"subject"`
+	Body    string   `json:"body"`
+	PubTime string   `json:"pubTime"`
+	SendTo  []string `json:"sendTo"`
 }
 
 // MessageList defines the return format
@@ -125,14 +125,14 @@ type MessageList struct {
 }
 
 // ActivityIntroductionForClub include required information in activity list page
-type ActivityIntroductionForClub struct {  
-	ID              int    `json:"id"`
-	Name            string `json:"name"`
-	PubStartTime    string  `json:"pubStartTime"`
-	PageViews       int    `json:"pageViews"`
-	RegisterNum     int    `json:"registerNum"`
-	Type            int    `json:"type"`
-	CanEnrolled     int    `json:"canEnrolled"`
+type ActivityIntroductionForClub struct {
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	PubStartTime string `json:"pubStartTime"`
+	PageViews    int    `json:"pageViews"`
+	RegisterNum  int    `json:"registerNum"`
+	Type         int    `json:"type"`
+	CanEnrolled  int    `json:"canEnrolled"`
 }
 
 // ActivityListForClub defines the return format
@@ -141,7 +141,15 @@ type ActivityListForClub struct {
 }
 
 type NumOfActStatus struct {
-	AuditNum        int   `json:"auditNum"`
-	OngoingNum      int   `json:"ongoingNum"`
-	OverNum         int   `json:"overNum"`
+	AuditNum   int `json:"auditNum"`
+	OngoingNum int `json:"ongoingNum"`
+	OverNum    int `json:"overNum"`
+}
+
+type ActivityApplyMessage struct {
+	ActApplyId int    `json:"id"`
+	UserName   string `json:"username"`
+	StudentId  string `json:"studentid"`
+	Phone      string `json:"phone"`
+	School     string `json:"school"`
 }

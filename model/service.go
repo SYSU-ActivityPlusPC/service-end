@@ -394,3 +394,37 @@ func GetUserList(verify int) []PCUser {
 	}
 	return ret
 }
+
+// GetApplyListByID return list of apply whose act id is given
+func GetApplyListByID(id int) []ActApplyInfo{
+	ret := make([]ActApplyInfo, 0)
+	err := Engine.Where("actid=?", id).Find(&ret)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	return ret
+}
+
+// TODO: DeleteApplyByID remove apply with given id
+func DeleteApplyByID(actid int, applyid int) bool{
+	_, err := Engine.Where("actid=?", actid).And("").Delete(&ActApplyInfo{})
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+// CloseActApplyByID close applicance of act whose id is given
+func CloseActApplyByID(id int) bool{
+	edit := ActivityInfo{
+		CanEnrolled: 2,
+	}
+	_, err := Engine.Where("id=?", id).Cols("can_enrolled").Update(&edit)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
