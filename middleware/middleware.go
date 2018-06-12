@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/gorilla/mux"
 	"os"
 	"fmt"
 	"net/http"
@@ -126,6 +127,33 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 					next(rw, r)
 					return
 				} else {
+					rw.WriteHeader(401)
+					return
+				}
+			}
+
+			if strings.HasPrefix(path, "/act/") && r.Method == "PUT" {
+				actid := mux.Vars(r)["actid"]
+				intActID, err := strconv.Atoi(actid)
+				if intActID <= 0 || err != nil {
+					rw.WriteHeader(400)
+					return
+				}
+				if ok, err := model.IsPublishedByClub(userId, intActID); err != nil || !ok {
+					rw.WriteHeader(401)
+					return
+				}
+			}
+
+			if path == "actApply" {
+				r.ParseForm()
+				actID := r.FormValue("act")
+				intActID, err := strconv.Atoi(actID)
+				if intActID <= 0 || err != nil {
+					rw.WriteHeader(400)
+					return
+				}
+				if ok, err := model.IsPublishedByClub(userId, intActID); err != nil || !ok {
 					rw.WriteHeader(401)
 					return
 				}
