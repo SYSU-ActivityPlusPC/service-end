@@ -855,7 +855,7 @@ func ListActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	content := make([]types.ActivityApplyMessage, 0)
 	for _, v := range(list) {
-		tmp := types.ActivityApplyMessage{1, v.UserName, v.StudentId, v.Phone, v.School}
+		tmp := types.ActivityApplyMessage{v.ID, v.UserName, v.StudentId, v.Phone, v.School}
 		content = append(content, tmp)
 	}
 	retMsg := RetType{[]string{"名字", "学号", "联系方式", "学院"}, content}
@@ -871,7 +871,7 @@ func ListActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
 func DeleteActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	actid := r.FormValue("act")
-	applyid := r.FormValue("applyId")
+	applyid := r.FormValue("actApply")
 	intActID, err := strconv.Atoi(actid)
 	if err != nil {
 		fmt.Println(err)
