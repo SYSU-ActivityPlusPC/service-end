@@ -892,6 +892,12 @@ func DeleteActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+	// Check if the user can access this activity
+	apply := model.GetApplyByID(intApplyID)
+	if apply.ID <= 0 || apply.ActId != intActID {
+		w.WriteHeader(204)
+		return
+	}
 
 	isRemoved := model.DeleteApplyByID(intActID, intApplyID)
 	if isRemoved {

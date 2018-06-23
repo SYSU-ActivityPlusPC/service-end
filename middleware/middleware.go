@@ -72,14 +72,14 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 			next(rw, r)
 			return
 		}
-		// Refuse all the anyous user
+		// Refuse all the anonymous user
 		if role == 0 {
 			rw.WriteHeader(401)
 			return
 		}
 		// Refuse some of the party user request
 		if role == 1 {
-			if path == "/act" && (r.Method == "GET" || r.Method == "PUT") {
+			if path == "/act" && r.Method == "GET" {
 				rw.WriteHeader(401)
 				return
 			}

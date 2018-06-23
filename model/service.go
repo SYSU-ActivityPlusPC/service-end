@@ -428,3 +428,16 @@ func CloseActApplyByID(id int) bool{
 	}
 	return true
 }
+
+func GetApplyByID(id int) *ActApplyInfo {
+	apply := new(ActApplyInfo)
+	ok, err := Engine.Where("id=?", id).Get(apply)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	if !ok {
+		apply.ID = -1
+	}
+	return apply
+}
