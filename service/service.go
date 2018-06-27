@@ -1,4 +1,4 @@
-package controller
+package service
 
 import (
 	"crypto/md5"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/sethvargo/go-password/password"
 	"github.com/streadway/amqp"
-	"github.com/sysu-activitypluspc/service-end/model"
+	"github.com/sysu-activitypluspc/service-end/dao"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -114,7 +114,7 @@ func CheckIsAdmin(username string) bool {
 
 // CheckEmail check if the user email exists in the db
 func CheckIfEmailExist(email string) bool {
-	user := model.GetUserByEmail(email)
+	user := dao.GetUserByEmail(email)
 	if user == nil {
 		return true
 	}

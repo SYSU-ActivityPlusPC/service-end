@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/sysu-activitypluspc/service-end/controller"
+	"github.com/sysu-activitypluspc/service-end/service"
 	"github.com/sysu-activitypluspc/service-end/middleware"
 	"github.com/urfave/negroni"
 )
@@ -15,36 +15,36 @@ func GetServer() *negroni.Negroni {
 	
 
 	act := r.PathPrefix("/act").Subrouter()
-	act.HandleFunc("", controller.AddActivityHandler).Methods("POST")
-	act.HandleFunc("/{actId}", controller.ModifyActivityHandler).Methods("POST")
-	act.HandleFunc("/{actId}", controller.DeleteActivityHandler).Methods("DELETE")
-	act.HandleFunc("", controller.VerifyActivityHandler).Methods("PUT")
-	act.HandleFunc("", controller.ShowActivitiesListHandler).Methods("GET")
-	act.HandleFunc("/{id}", controller.ShowActivityDetailHandler).Methods("GET")
-	act.HandleFunc("/{clubId}/list", controller.ShowActivitiesListByClubHandler).Methods("GET")
-	act.HandleFunc("/{clubId}/status", controller.GetNumberOfActStatusByClub).Methods("GET")
-	act.HandleFunc("/{actid}", controller.CloseActivityApply).Methods("PUT")
+	act.HandleFunc("", service.AddActivityHandler).Methods("POST")
+	act.HandleFunc("/{actId}", service.ModifyActivityHandler).Methods("POST")
+	act.HandleFunc("/{actId}", service.DeleteActivityHandler).Methods("DELETE")
+	act.HandleFunc("", service.VerifyActivityHandler).Methods("PUT")
+	act.HandleFunc("", service.ShowActivitiesListHandler).Methods("GET")
+	act.HandleFunc("/{id}", service.ShowActivityDetailHandler).Methods("GET")
+	act.HandleFunc("/{clubId}/list", service.ShowActivitiesListByClubHandler).Methods("GET")
+	act.HandleFunc("/{clubId}/status", service.GetNumberOfActStatusByClub).Methods("GET")
+	act.HandleFunc("/{actid}", service.CloseActivityApply).Methods("PUT")
 
 	session := r.PathPrefix("/session").Subrouter()
-	session.HandleFunc("", controller.LoginHandler).Methods("POST")
+	session.HandleFunc("", service.LoginHandler).Methods("POST")
 
 	pcuser := r.PathPrefix("/pcusers").Subrouter()
-	pcuser.HandleFunc("", controller.SignUpHandler).Methods("POST")
-	pcuser.HandleFunc("/{id}", controller.GetPCUserDetailHandler).Methods("GET")
-	pcuser.HandleFunc("", controller.VerifyPCUserHandler).Methods("PUT")
-	pcuser.HandleFunc("", controller.GetPCUserListHandler).Methods("GET")
+	pcuser.HandleFunc("", service.SignUpHandler).Methods("POST")
+	pcuser.HandleFunc("/{id}", service.GetPCUserDetailHandler).Methods("GET")
+	pcuser.HandleFunc("", service.VerifyPCUserHandler).Methods("PUT")
+	pcuser.HandleFunc("", service.GetPCUserListHandler).Methods("GET")
 
 	message := r.PathPrefix("/message").Subrouter()
-	message.HandleFunc("", controller.AddMessageHandler).Methods("POST")
-	message.HandleFunc("", controller.ShowMessagesListHandler).Methods("GET")
-	message.HandleFunc("/{id}", controller.ShowMessageDetailHandler).Methods("GET")
-	message.HandleFunc("/{id}", controller.DeleteMessageHandler).Methods("DELETE")
+	message.HandleFunc("", service.AddMessageHandler).Methods("POST")
+	message.HandleFunc("", service.ShowMessagesListHandler).Methods("GET")
+	message.HandleFunc("/{id}", service.ShowMessageDetailHandler).Methods("GET")
+	message.HandleFunc("/{id}", service.DeleteMessageHandler).Methods("DELETE")
 	
-	r.HandleFunc("/images", controller.UploadImageHandler).Methods("POST")
+	r.HandleFunc("/images", service.UploadImageHandler).Methods("POST")
 
 	actApply := r.PathPrefix("/actApply").Subrouter()
-	actApply.HandleFunc("", controller.ListActivityApplyHandler).Methods("GET")
-	actApply.HandleFunc("", controller.DeleteActivityApplyHandler).Methods("DELETE")
+	actApply.HandleFunc("", service.ListActivityApplyHandler).Methods("GET")
+	actApply.HandleFunc("", service.DeleteActivityApplyHandler).Methods("DELETE")
 	
 
 	s.UseHandler(r)

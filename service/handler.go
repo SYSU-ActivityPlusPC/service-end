@@ -1,4 +1,4 @@
-package controller
+package service
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/sysu-activitypluspc/service-end/model"
+	"github.com/sysu-activitypluspc/service-end/dao"
 	"github.com/sysu-activitypluspc/service-end/types"
 )
 
@@ -36,7 +36,7 @@ func AddMessageHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(400)
 	}
-	_, err = model.AddMessage(*jsonBody)
+	_, err = dao.AddMessage(*jsonBody)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(500)
@@ -58,7 +58,7 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = model.DeleteMessage(intId)
+	_, err = dao.DeleteMessage(intId)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -87,13 +87,13 @@ func ShowMessagesListHandler(w http.ResponseWriter, r *http.Request) {
 	// Judge if the passed param is valid
 	if intPageNum > 0 {
 		// Get message list
-		messageList := model.GetMessageList(intPageNum - 1)
+		messageList := dao.GetMessageList(intPageNum - 1)
 
 		// Find SendTo club
 		// Change each element to the format that we need
 		infoArr := make([]types.MessageIntroduction, 0)
 		for i := 0; i < len(messageList); i++ {
-			sendToList, err := model.GetMessageSendToList(messageList[i].ID)
+			sendToList, err := dao.GetMessageSendToList(messageList[i].ID)
 			if err != nil {
 				fmt.Fprint(os.Stderr, err)
 				w.WriteHeader(500)
@@ -144,9 +144,9 @@ func ShowMessageDetailHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Judge if the passed param is valid
 	if intID > 0 {
-		ok, messageInfo := model.GetMessageInfo(intID)
+		ok, messageInfo := dao.GetMessageInfo(intID)
 		if ok {
-			sendToList, err := model.GetMessageSendToList(intID)
+			sendToList, err := dao.GetMessageSendToList(intID)
 			if err != nil {
 				fmt.Fprint(os.Stderr, err)
 				w.WriteHeader(500)
@@ -197,7 +197,7 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(400)
 	}
-	_, err = model.AddActivity(*jsonBody, ID)
+	_, err = dao.AddActivity(*jsonBody, ID)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(500)
@@ -228,7 +228,7 @@ func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsonBody := new(types.ActivityInfo)
 	json.Unmarshal(body, jsonBody)
-	_, err = model.UpdateActivity(intActID, *jsonBody)
+	_, err = dao.UpdateActivity(intActID, *jsonBody)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -249,7 +249,7 @@ func DeleteActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = model.DeleteActivity(intActID)
+	_, err = dao.DeleteActivity(intActID)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -273,7 +273,7 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = model.VerifyActivity(intActID, intVerify)
+	_, err = dao.VerifyActivity(intActID, intVerify)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -291,7 +291,7 @@ func GetNumberOfActStatusByClub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	auditNum, ongoingNum, overNum := model.GetActStatusNumByClub(intClubId)
+	auditNum, ongoingNum, overNum := dao.GetActStatusNumByClub(intClubId)
 
 	tmp := types.NumOfActStatus{auditNum, ongoingNum, overNum}
 	
@@ -331,7 +331,7 @@ func ShowActivitiesListByClubHandler(w http.ResponseWriter, r *http.Request) {
 	// Judge if the passed param is valid
 	if intPageNum > 0 {
 		// Get club's all activities
-		activityList := model.GetActivityListByClub(intPageNum-1, intClubId)
+		activityList := dao.GetActivityListByClub(intPageNum-1, intClubId)
 
 		// Change each element to the format that we need
 		infoArr := make([]types.ActivityIntroductionForClub, 0)
@@ -355,7 +355,7 @@ func ShowActivitiesListByClubHandler(w http.ResponseWriter, r *http.Request) {
 			registerNum := 0
 			// activity registration is on or has done
 			if activityList[i].CanEnrolled == 1 || activityList[i].CanEnrolled == 2 {
-				registerNum = model.GetRegisterNumByActId(activityList[i].ID)
+				registerNum = dao.GetRegisterNumByActId(activityList[i].ID)
 			}
 			
 			tmp := types.ActivityIntroductionForClub{
@@ -423,7 +423,7 @@ func ShowActivitiesListHandler(w http.ResponseWriter, r *http.Request) {
 	// Judge if the passed param is valid
 	if intPageNum > 0 {
 		// Get activity list
-		activityList := model.GetActivityList(intPageNum-1, intVerified)
+		activityList := dao.GetActivityList(intPageNum-1, intVerified)
 
 		// Change each element to the format that we need
 		infoArr := make([]types.ActivityIntroduction, 0)
@@ -477,7 +477,7 @@ func ShowActivityDetailHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Judge if the passed param is valid
 	if intID > 0 {
-		ok, activityInfo := model.GetActivityInfo(intID)
+		ok, activityInfo := dao.GetActivityInfo(intID)
 		if ok {
 			layout := "2006-01-02 15:04"
 			// Convert to ms
@@ -527,7 +527,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		username := r.Header.Get("X-Account")
 		// Handle role 1 and 2
 		if IntRole == 1 || IntRole == 2 {
-			user := model.GetUserInfo(username)
+			user := dao.GetUserInfo(username)
 			res := types.PCUserInfo{
 				ID:    user.ID,
 				Name:  user.Name,
@@ -553,7 +553,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Get post body
 	jsonBody := new(types.PCUserRequest)
 	err = json.Unmarshal(body, &jsonBody)
-	user := model.GetUserInfo(jsonBody.Account)
+	user := dao.GetUserInfo(jsonBody.Account)
 	if user.ID < 0 {
 		w.WriteHeader(400)
 		return
@@ -601,7 +601,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	ok := model.AddUser(*jsonBody)
+	ok := dao.AddUser(*jsonBody)
 	if ok {
 		w.WriteHeader(200)
 		return
@@ -656,7 +656,7 @@ func GetPCUserDetailHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	user := model.GetUserByID(intID)
+	user := dao.GetUserByID(intID)
 	if user.ID == -1 {
 		w.WriteHeader(204)
 	}
@@ -713,7 +713,7 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Update db, including time, password, account and status
-	user := model.GetUserByID(intID)
+	user := dao.GetUserByID(intID)
 	if user.ID == -1 {
 		w.WriteHeader(204)
 		return
@@ -726,9 +726,9 @@ func VerifyPCUserHandler(w http.ResponseWriter, r *http.Request) {
 	if intVerify == 1 {
 		now := time.Now().Add(time.Hour * 8)
 		password = GeneratePassword(12)
-		err = model.VerifyUser(intID, intVerify, user.Email, getPassword(strconv.Itoa(user.ID), password), &now)
+		err = dao.VerifyUser(intID, intVerify, user.Email, getPassword(strconv.Itoa(user.ID), password), &now)
 	} else {
-		err = model.VerifyUser(intID, intVerify, "", "", nil)
+		err = dao.VerifyUser(intID, intVerify, "", "", nil)
 	}
 	if err != nil {
 		fmt.Println(err)
@@ -773,7 +773,7 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 	retContent := make([]types.PCUserListInfo, 0)
 	if intType == 0 {
 		// Get only the verified user
-		userList := model.GetUserList(1)
+		userList := dao.GetUserList(1)
 		if userList == nil {
 			w.WriteHeader(500)
 			return
@@ -793,8 +793,8 @@ func GetPCUserListHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		// Get all of the user
-		userList := model.GetUserList(0)
-		tmp := model.GetUserList(2)
+		userList := dao.GetUserList(0)
+		tmp := dao.GetUserList(2)
 		if userList == nil || tmp == nil {
 			w.WriteHeader(500)
 			return
@@ -840,7 +840,7 @@ func ListActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	list := model.GetApplyListByID(intActID)
+	list := dao.GetApplyListByID(intActID)
 	if list == nil {
 		w.WriteHeader(500)
 		return
@@ -893,13 +893,13 @@ func DeleteActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Check if the user can access this activity
-	apply := model.GetApplyByID(intApplyID)
+	apply := dao.GetApplyByID(intApplyID)
 	if apply.ID <= 0 || apply.ActId != intActID {
 		w.WriteHeader(204)
 		return
 	}
 
-	isRemoved := model.DeleteApplyByID(intActID, intApplyID)
+	isRemoved := dao.DeleteApplyByID(intActID, intApplyID)
 	if isRemoved {
 		w.WriteHeader(200)
 		return
@@ -920,7 +920,7 @@ func CloseActivityApply(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isClosed := model.CloseActApplyByID(intActID)
+	isClosed := dao.CloseActApplyByID(intActID)
 	if isClosed {
 		w.WriteHeader(200)
 		return

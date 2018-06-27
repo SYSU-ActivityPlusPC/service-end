@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 	
-	"github.com/sysu-activitypluspc/service-end/controller"
-	"github.com/sysu-activitypluspc/service-end/model"
+	"github.com/sysu-activitypluspc/service-end/service"
+	"github.com/sysu-activitypluspc/service-end/dao"
 )
 
 // ValidUserMiddleWare check token and decide the permission
@@ -39,17 +39,17 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 	if len(auth) <= 0 {
 		r.Header.Set("X-Role", "0")
 	} else {
-		ok, name := controller.CheckToken(auth)
+		ok, name := service.CheckToken(auth)
 		if ok != 2 {
 			r.Header.Set("X-Role", "0")
 		} else {
 			// Check user account
-			user := model.GetUserInfo(name)
+			user := dao.GetUserInfo(name)
 			if user.ID <= 0 {
 				r.Header.Set("X-Role", "0")
 				userId = -1
 			} else {
-				isAdmin := controller.CheckIsAdmin(name)
+				isAdmin := service.CheckIsAdmin(name)
 				userId = user.ID
 				if isAdmin {
 					role = 2
@@ -122,7 +122,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 					return
 				}
 
-				yes, _ := model.IsPublishedByClub(userId, intActId)
+				yes, _ := dao.IsPublishedByClub(userId, intActId)
 				if yes {
 					next(rw, r)
 					return
@@ -139,7 +139,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 					rw.WriteHeader(400)
 					return
 				}
-				if ok, err := model.IsPublishedByClub(userId, intActID); err != nil || !ok {
+				if ok, err := dao.IsPublishedByClub(userId, intActID); err != nil || !ok {
 					rw.WriteHeader(401)
 					return
 				}
@@ -153,7 +153,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 					rw.WriteHeader(400)
 					return
 				}
-				if ok, err := model.IsPublishedByClub(userId, intActID); err != nil || !ok {
+				if ok, err := dao.IsPublishedByClub(userId, intActID); err != nil || !ok {
 					rw.WriteHeader(401)
 					return
 				}
