@@ -9,7 +9,7 @@ import (
 
 // Activity
 func (act *ActivityInfo) Insert(session *xorm.Session) (int, error) {
-	affected, err := Engine.InsertOne(&act)
+	affected, err := session.InsertOne(&act)
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
@@ -19,7 +19,7 @@ func (act *ActivityInfo) Insert(session *xorm.Session) (int, error) {
 
 func (act *ActivityInfo) Delete(session *xorm.Session) (int, error) {
 	id := act.ID
-	affected, err := Engine.Id(id).Delete(&ActivityInfo{})
+	affected, err := session.Id(id).Delete(&ActivityInfo{})
 	if err != nil {
 		return 0, err
 	}
@@ -31,7 +31,7 @@ func (act *ActivityInfo) Delete(session *xorm.Session) (int, error) {
 
 func (act *ActivityInfo) UpdateVerifiedStatus(session *xorm.Session) (int, error) {
 	id := act.ID
-	affected, err := Engine.Id(id).Cols("verified").Update(act)
+	affected, err := session.Id(id).Cols("verified").Update(act)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -40,7 +40,7 @@ func (act *ActivityInfo) UpdateVerifiedStatus(session *xorm.Session) (int, error
 
 func (act *ActivityInfo) Update(session *xorm.Session) (int, error) {
 	id := act.ID
-	affected, err := Engine.Id(id).Update(&act)
+	affected, err := session.Id(id).Update(&act)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -49,7 +49,7 @@ func (act *ActivityInfo) Update(session *xorm.Session) (int, error) {
 
 func (act *ActivityInfo) Get(session *xorm.Session) {
 	id := act.ID
-	_, err := Engine.ID(id).Get(act)
+	_, err := session.ID(id).Get(act)
 	if err != nil {
 		act = nil
 		fmt.Println(err)
@@ -62,7 +62,7 @@ func (act *ActivityInfo) ListStatusNumByClubID(session *xorm.Session) (int, int,
 	var auditNum, ongoingNum, overNum int = 0, 0, 0
 	now := time.Now().Add(time.Hour * 8)
 	// Search clubId's activity
-	err := Engine.Desc("id").Where("pcuser_id = ?", clubId).Find(&activityList)
+	err := session.Desc("id").Where("pcuser_id = ?", clubId).Find(&activityList)
 	if err != nil {
 		fmt.Println(err)
 		return -1, -1, -1
@@ -85,7 +85,7 @@ func (act *ActivityInfo) ListByClubID(session *xorm.Session, pageNum int) []Acti
 	clubId := act.PCUserID
 	activityList := make([]ActivityInfo, 0)
 	// Search clubId's activity
-	err := Engine.Desc("id").Where("pcuser_id = ?", clubId).Find(&activityList)
+	err := session.Desc("id").Where("pcuser_id = ?", clubId).Find(&activityList)
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -107,7 +107,7 @@ func (act *ActivityInfo) ListByVerifiedStatus(session *xorm.Session, pageNum int
 	// 0 stands for no pass
 	// 1 stands for pass
 	// 2 stands for not yet verified
-	err := Engine.Desc("id").Where("verified = ?", verified).Find(&activityList)
+	err := session.Desc("id").Where("verified = ?", verified).Find(&activityList)
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -148,7 +148,7 @@ func (apply *ActApplyInfo) Delete(session *xorm.Session) bool {
 // PC user
 func (user *PCUser) GetByAccount(session *xorm.Session) {
 	account := user.Account
-	_, err := Engine.Where("account = ?", account).Get(&user)
+	_, err := session.Where("account = ?", account).Get(&user)
 	if err != nil {
 		fmt.Println(err)
 		user.ID = -1
@@ -157,7 +157,7 @@ func (user *PCUser) GetByAccount(session *xorm.Session) {
 
 func (user *PCUser) GetByEmail() {
 	email := user.Email
-	_, err := Engine.Where("email=?", email).Get(user)
+	_, err := session.Where("email=?", email).Get(user)
 	if err != nil {
 		fmt.Println(err)
 		user = nil
@@ -166,7 +166,7 @@ func (user *PCUser) GetByEmail() {
 
 func (user *PCUser) GetByID() {
 	id := user.ID
-	_, err := Engine.Where("id=?", id).Get(user)
+	_, err := session.Where("id=?", id).Get(user)
 	if err != nil {
 		fmt.Println(err)
 		user = nil
@@ -175,7 +175,7 @@ func (user *PCUser) GetByID() {
 
 func (user *PCUser) UpdateVerifiedStatus(session *xorm.Session) (int, error) {
 	id := user.ID
-	affected, err := Engine.Where("id=?", id).Cols("verified").Cols("account").Cols("password").Cols("register_time").Update(user)
+	affected, err := session.Where("id=?", id).Cols("verified").Cols("account").Cols("password").Cols("register_time").Update(user)
 	if err != nil {
 		fmt.Println(err)
 		return 0, err
@@ -186,7 +186,7 @@ func (user *PCUser) UpdateVerifiedStatus(session *xorm.Session) (int, error) {
 func (user *PCUser) ListByVerifiedStatus(session *xorm.Session) []PCUser{
 	verify := user.Verified
 	ret := make([]PCUser, 0)
-	err := Engine.Where("verified = ?", verify).Incr("id").Find(&ret)
+	err := session.Where("verified = ?", verify).Incr("id").Find(&ret)
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -195,7 +195,7 @@ func (user *PCUser) ListByVerifiedStatus(session *xorm.Session) []PCUser{
 }
 
 func (user *PCUser) Insert(session *xorm.Session) bool {
-	_, err := Engine.InsertOne(&user)
+	_, err := session.InsertOne(&user)
 	if err != nil {
 		fmt.Println(err)
 		return false
