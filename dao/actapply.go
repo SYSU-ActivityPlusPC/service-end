@@ -9,10 +9,13 @@ import (
 
 func (apply *ActApplyInfo) Get(session *xorm.Session) {
 	id := apply.ID
-	_, err := session.Where("id=?", id).Get(apply)
+	has, err := session.Where("id=?", id).Get(apply)
 	if err != nil {
 		fmt.Println(err)
 		apply = nil
+	}
+	if !has {
+		apply.ID = -1
 	}
 }
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/sysu-activitypluspc/service-end/router"
+	"github.com/sysu-activitypluspc/service-end/ui"
 	"os"
 )
 
@@ -14,6 +14,6 @@ func main() {
 	}
 	PORT = ":" + PORT
 
-	server := router.GetServer()
+	server := ui.GetServer()
 	server.Run(PORT)
 }

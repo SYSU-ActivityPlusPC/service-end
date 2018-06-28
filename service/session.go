@@ -6,4 +6,8 @@ type Session struct {
 }
 
 // Login user login
-func (s *Session) Login() {}
+func (s *Session) Login() {
+	session := GetSession()
+	defer DeleteSession(session, true)
+	// TODO: too many things to do
+}

@@ -7,44 +7,44 @@ import (
 	"github.com/go-xorm/xorm"
 )
 
-func (act *ActivityInfo) Insert(session *xorm.Session) (int, error) {
+func (act *ActivityInfo) Insert(session *xorm.Session) (int) {
 	affected, err := session.InsertOne(&act)
 	if err != nil {
 		fmt.Println(err)
-		return 0, err
+		return -1
 	}
-	return int(affected), nil
+	return int(affected)
 }
 
-func (act *ActivityInfo) Delete(session *xorm.Session) (int, error) {
+func (act *ActivityInfo) Delete(session *xorm.Session) (int) {
 	id := act.ID
 	affected, err := session.Id(id).Delete(&ActivityInfo{})
 	if err != nil {
-		return 0, err
+		fmt.Println(err)
+		return -1
 	}
-	if affected == 0 {
-		fmt.Println("Failed to delete an activity")
-	}
-	return int(affected), nil
+	return int(affected)
 }
 
-func (act *ActivityInfo) UpdateVerifiedStatus(session *xorm.Session) (int, error) {
+func (act *ActivityInfo) UpdateVerifiedStatus(session *xorm.Session) (int) {
 	id := act.ID
 	affected, err := session.Id(id).Cols("verified").Update(act)
 	if err != nil {
 		fmt.Println(err)
+		return -1
 	}
-	return int(affected), nil
+	return int(affected)
 }
 
 // TODO: Use map to update
-func (act *ActivityInfo) Update(session *xorm.Session) (int, error) {
+func (act *ActivityInfo) Update(session *xorm.Session) (int) {
 	id := act.ID
 	affected, err := session.Id(id).Update(&act)
 	if err != nil {
 		fmt.Println(err)
+		return -1
 	}
-	return int(affected), err
+	return int(affected)
 }
 
 func (act *ActivityInfo) UpdateEnrolled(session *xorm.Session) int {
@@ -91,11 +91,11 @@ func (act *ActivityInfo) ListStatusNumByClubID(session *xorm.Session) (int, int,
 	return auditNum, ongoingNum, overNum
 }
 
-func (act *ActivityInfo) ListByClubID(session *xorm.Session, pageNum int) []ActivityInfo {
+func (act *ActivityInfo) ListVerifiedByClubID(session *xorm.Session, pageNum int) []ActivityInfo {
 	clubId := act.PCUserID
 	activityList := make([]ActivityInfo, 0)
 	// Search clubId's activity
-	err := session.Desc("id").Where("pcuser_id = ?", clubId).Find(&activityList)
+	err := session.Desc("id").Where("pcuser_id = ?", clubId).And("verified = 1").Find(&activityList)
 	if err != nil {
 		fmt.Println(err)
 		return nil

@@ -74,7 +74,7 @@ func (msg *MessagePCUser) Insert(session *xorm.Session) int {
 	affected, err := session.InsertOne(msg)
 	if err != nil {
 		fmt.Println(err)
-		return 0
+		return -1
 	}
 	return int(affected)
 }

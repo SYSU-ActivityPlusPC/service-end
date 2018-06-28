@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-xorm/xorm"
+
 	"github.com/sethvargo/go-password/password"
 	"github.com/streadway/amqp"
 	"github.com/sysu-activitypluspc/service-end/dao"
@@ -189,4 +191,22 @@ func WriteMessageQueue(name string, content []byte) bool {
 		return false
 	}
 	return true
+}
+
+func GetSession() *xorm.Session {
+	session := dao.Engine.NewSession()
+	if session != nil {
+		fmt.Println("Can not create mysql session.")
+		applys = nil
+		return nil
+	}
+	session.Begin()
+}
+
+func DeleteSession(session *xorm.Session, status bool) {
+	if status {
+		session.Commit()
+	} else {
+		session.Rollback()
+	}
 }
