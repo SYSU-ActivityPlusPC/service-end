@@ -7,48 +7,47 @@ import (
 	"github.com/go-xorm/xorm"
 )
 
-func (apply *ActApplyInfo) Get(session *xorm.Session) {
+func (apply *ActApplyInfo) Get(session *xorm.Session) (bool, error) {
 	id := apply.ID
 	has, err := session.Where("id=?", id).Get(apply)
 	if err != nil {
 		fmt.Println(err)
 		apply = nil
+		return false, err
 	}
-	if !has {
-		apply.ID = -1
-	}
+	return has, nil
 }
 
-func (apply *ActApplyInfo) ListByActID(session *xorm.Session) []ActApplyInfo {
+func (apply *ActApplyInfo) ListByActID(session *xorm.Session) ([]ActApplyInfo, error) {
 	actid := apply.ActId
 	ret := make([]ActApplyInfo, 0)
 	err := session.Where("actid=?", actid).Find(&ret)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, err
 	}
-	return ret
+	return ret, nil
 }
 
-func (apply *ActApplyInfo) GetRegisterNum(session *xorm.Session) int {
+func (apply *ActApplyInfo) GetRegisterNum(session *xorm.Session) (int, error) {
 	actId := apply.ActId
 	counts, err := session.Where("actid = ?", actId).Count(&ActApplyInfo{})
 	if err != nil {
 		fmt.Println(err)
-		return -1
+		return 0, err
 	}
 	s := strconv.FormatInt(counts, 10)
 	result, _ := strconv.Atoi(s)
-	return result
+	return result, nil
 }
 
-func (apply *ActApplyInfo) Delete(session *xorm.Session) bool {
+func (apply *ActApplyInfo) Delete(session *xorm.Session) (int, error) {
 	actid := apply.ActId
 	applyid := apply.ID
-	_, err := session.Where("actid=?", actid).And("id=?", applyid).Delete(&ActApplyInfo{})
+	affected, err := session.Where("actid=?", actid).And("id=?", applyid).Delete(&ActApplyInfo{})
 	if err != nil {
 		fmt.Println(err)
-		return false
+		return 0, err
 	}
-	return true
+	return int(affected), nil
 }

@@ -6,31 +6,36 @@ import (
 	"github.com/go-xorm/xorm"
 )
 
-func (user *PCUser) GetByAccount(session *xorm.Session) {
+func (user *PCUser) GetByAccount(session *xorm.Session) (bool, error) {
 	account := user.Account
-	_, err := session.Where("account = ?", account).Get(&user)
+	has, err := session.Where("account = ?", account).Get(&user)
 	if err != nil {
 		fmt.Println(err)
-		user.ID = -1
+		return false, err
 	}
+	return has, nil
 }
 
-func (user *PCUser) GetByEmail(session *xorm.Session) {
+func (user *PCUser) GetByEmail(session *xorm.Session) (bool, error) {
 	email := user.Email
-	_, err := session.Where("email=?", email).Get(user)
+	has, err := session.Where("email=?", email).Get(user)
 	if err != nil {
 		fmt.Println(err)
 		user = nil
+		return false, err
 	}
+	return has, nil
 }
 
-func (user *PCUser) GetByID(session *xorm.Session) {
+func (user *PCUser) GetByID(session *xorm.Session) (bool, error) {
 	id := user.ID
-	_, err := session.Where("id=?", id).Get(user)
+	has, err := session.Where("id=?", id).Get(user)
 	if err != nil {
 		fmt.Println(err)
 		user = nil
+		return false, err
 	}
+	return has, nil
 }
 
 func (user *PCUser) UpdateVerifiedStatus(session *xorm.Session) (int, error) {
@@ -43,22 +48,22 @@ func (user *PCUser) UpdateVerifiedStatus(session *xorm.Session) (int, error) {
 	return int(affected), err
 }
 
-func (user *PCUser) ListByVerifiedStatus(session *xorm.Session) []PCUser {
+func (user *PCUser) ListByVerifiedStatus(session *xorm.Session) ([]PCUser, error) {
 	verify := user.Verified
 	ret := make([]PCUser, 0)
 	err := session.Where("verified = ?", verify).Incr("id").Find(&ret)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, err
 	}
-	return ret
+	return ret, nil
 }
 
-func (user *PCUser) Insert(session *xorm.Session) bool {
-	_, err := session.InsertOne(&user)
+func (user *PCUser) Insert(session *xorm.Session) (int, error) {
+	affected, err := session.InsertOne(&user)
 	if err != nil {
 		fmt.Println(err)
-		return false
+		return 0, err
 	}
-	return true
+	return int(affected), nil
 }

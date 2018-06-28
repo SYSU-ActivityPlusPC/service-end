@@ -14,27 +14,30 @@ func (msg *Message) Insert(session *xorm.Session) (int, error) {
 	return int(affected), nil
 }
 
-func (msg *Message) List(session *xorm.Session, pageNum int) []Message {
+func (msg *Message) List(session *xorm.Session, pageNum int) ([]Message, error) {
 	messageList := make([]Message, 0)
-	session.Desc("id").Find(&messageList)
+	err := session.Desc("id").Find(&messageList)
+	if err != nil {
+		return nil, err
+	}
 	from := pageNum * 10
 	if from >= len(messageList) {
-		return []Message{}
+		return []Message{}, nil
 	}
 	if from+10 > len(messageList) {
-		return messageList[from:]
+		return messageList[from:], nil
 	}
-	return messageList[from : from+10]
+	return messageList[from : from+10], nil
 }
 
-func (msg *Message) Get(session *xorm.Session) error {
+func (msg *Message) Get(session *xorm.Session) (bool, error) {
 	id := msg.ID
-	_, err := session.ID(id).Get(&msg)
+	has, err := session.ID(id).Get(&msg)
 	if err != nil {
 		msg = nil
-		return err
+		return false, err
 	}
-	return nil
+	return has, nil
 }
 
 func (msg *Message) Delete(session *xorm.Session) (int, error) {
@@ -42,9 +45,6 @@ func (msg *Message) Delete(session *xorm.Session) (int, error) {
 	affected, err := session.Id(id).Delete(&Message{})
 	if err != nil {
 		return 0, err
-	}
-	if affected == 0 {
-		fmt.Println("Failed to delete an message")
 	}
 	return int(affected), nil
 }
@@ -70,11 +70,11 @@ func (msg *MessagePCUser) ListSentTo(session *xorm.Session) ([]string, error) {
 	return clubNameList, nil
 }
 
-func (msg *MessagePCUser) Insert(session *xorm.Session) int {
+func (msg *MessagePCUser) Insert(session *xorm.Session) (int, error) {
 	affected, err := session.InsertOne(msg)
 	if err != nil {
 		fmt.Println(err)
-		return -1
+		return 0, err
 	}
-	return int(affected)
+	return int(affected), nil
 }
