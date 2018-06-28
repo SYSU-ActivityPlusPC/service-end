@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/sysu-activitypluspc/service-end/ui"
 	"os"
+
+	"github.com/sysu-activitypluspc/service-end/ui"
 )
 
 var PORT = "8080"

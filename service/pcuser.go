@@ -94,6 +94,9 @@ func (u *PCUser) AduitUser(message string) (int, error) {
 
 // ListUsers list users with given user type
 func (us PCUserSlice) ListUsers(userType int) (int, error) {
+	if userType != 1 && userType != 0 {
+		return 400, errors.New("Invalid user type")
+	}
 	session := GetSession()
 	u := new(dao.PCUser)
 	defer DeleteSession(session, true)

@@ -168,3 +168,21 @@ func (act *ActivityInfo) CloseActivity() (int, error) {
 	}
 	return 200, nil
 }
+
+// Is act published by account
+func (act *ActivityInfo) CheckMessageCorrectness() (bool, error) {
+	userid := act.PCUserID
+	session := GetSession()
+	defer DeleteSession(session, true)
+	has, err := act.Get(session)
+	if err != nil {
+		return false, err
+	}
+	if !has {
+		return false, nil
+	}
+	if userid != act.PCUserID {
+		return false, nil
+	}
+	return true, nil
+}

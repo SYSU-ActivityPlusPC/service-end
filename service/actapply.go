@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+
 	"github.com/sysu-activitypluspc/service-end/dao"
 )
 
@@ -12,7 +13,7 @@ type ActApplyInfo struct {
 type ActApplySlice []ActApplyInfo
 
 // GetApplyList returns apply list with given id
-func (applys ActApplySlice) GetApplyList(actid int) (int, error){
+func (applys ActApplySlice) GetApplyList(actid int) (int, error) {
 	if actid <= 0 {
 		return 400, errors.New("Invalid activity id")
 	}
@@ -40,7 +41,6 @@ func (apply *ActApplyInfo) DeleteApply() (int, error) {
 	daoApply := new(dao.ActApplyInfo)
 	daoApply.ID = apply.ID
 
-	// Check if the apply matches
 	session := GetSession()
 	defer DeleteSession(session, true)
 	affected, err := daoApply.Delete(session)
