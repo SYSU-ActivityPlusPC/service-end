@@ -13,7 +13,7 @@ type ActivitySlice []ActivityInfo
 
 // AddActivity add activity
 func (act *ActivityInfo) AddActivity() {
-
+	sesson := dao.Engine.NewSession()
 }
 
 // GetActivityNumber receives club id, returns different status' number

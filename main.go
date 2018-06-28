@@ -1,8 +1,8 @@
 package main
 
 import (
-	"os"
 	"github.com/sysu-activitypluspc/service-end/router"
+	"os"
 )
 
 var PORT = "8080"
