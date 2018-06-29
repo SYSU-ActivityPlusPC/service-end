@@ -38,12 +38,9 @@ func (applys ActApplySlice) GetApplyList(actid int) (int, error) {
 
 // DeleteApply delete apply with act id and apply id
 func (apply *ActApplyInfo) DeleteApply() (int, error) {
-	daoApply := new(dao.ActApplyInfo)
-	daoApply.ID = apply.ID
-
 	session := GetSession()
 	defer DeleteSession(session, true)
-	affected, err := daoApply.Delete(session)
+	affected, err := apply.Delete(session)
 	if err != nil {
 		DeleteSession(session, false)
 		return 500, err

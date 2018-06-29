@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -10,6 +11,16 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sysu-activitypluspc/service-end/service"
 )
+
+type AddActivityMessage struct {
+	service.ActivityInfo
+}
+
+type ActivityStatus struct {
+	AduitNumber   int `json:"aduitNum"`
+	OngoingNumber int `json:"ongoingNum"`
+	OverNumber    int `json:"overNum"`
+}
 
 // AddActivityHandler add activity to the db
 func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
@@ -25,6 +36,17 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+
+	act := new(AddActivityMessage)
+	err = json.Unmarshal(body, act)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	act.PCUserID = ID
+	code, err := act.AddActivity()
+	w.WriteHeader(code)
 }
 
 // ModifyActivityHandler change the message except id and verified
@@ -62,6 +84,15 @@ func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
+	act := new(AddActivityMessage)
+	err = json.Unmarshal(body, act)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	code, err := act.ModifyActivity()
+	w.WriteHeader(code)
 }
 
 // DeleteActivityHandler remove activity with given id
@@ -77,6 +108,11 @@ func DeleteActivityHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+
+	act := new(AddActivityMessage)
+	act.ID = intActID
+	code, err := act.DeleteActivity()
+	w.WriteHeader(code)
 }
 
 // VerifyActivityHandler change the verify status of an activity
@@ -96,6 +132,11 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	act := new(AddActivityMessage)
+	act.ID = intActID
+	act.Verified = intVerify
+	code, err := act.AduitActivity()
+	w.WriteHeader(code)
 }
 
 func GetNumberOfActStatusByClubHandler(w http.ResponseWriter, r *http.Request) {
@@ -111,6 +152,22 @@ func GetNumberOfActStatusByClubHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(401)
 		return
 	}
+
+	act := new(AddActivityMessage)
+	act.PCUserID = intClubId
+	status, err := act.GetActivityNumber()
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	res := ActivityStatus{status[0], status[1], status[2]}
+	byteRes, err := json.Marshal(res)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	w.Write(byteRes)
 }
 
 // ShowActivitiesListByClubHandler display activity with given page number, only club use

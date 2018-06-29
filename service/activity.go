@@ -16,10 +16,9 @@ type ActivitySlice []ActivityInfo
 // AddActivity add activity
 func (act *ActivityInfo) AddActivity() (int, error) {
 	// TODO: Check data in activity
-	daoAct := act.ActivityInfo
 	session := GetSession()
 	defer DeleteSession(session, true)
-	affected, err := daoAct.Insert(session)
+	affected, err := act.Insert(session)
 	if err != nil {
 		DeleteSession(session, false)
 		return 500, err
@@ -32,7 +31,7 @@ func (act *ActivityInfo) AddActivity() (int, error) {
 
 // GetActivityNumber receives club id, returns different status' number
 // with order: audit, ongoing, over
-func (act *ActivityInfo) GetActivityNumber(clubID int) ([]int, error) {
+func (act *ActivityInfo) GetActivityNumber() ([]int, error) {
 	session := GetSession()
 	defer DeleteSession(session, true)
 	a, b, c, err := act.ActivityInfo.ListStatusNumByClubID(session)
@@ -83,7 +82,7 @@ func (acts ActivitySlice) GetActivityListByAdmin(page int, verified int) (int, e
 }
 
 // GetActivityInfor returns activity info with the given id
-func (act *ActivityInfo) GetActivityInfo(id int) (int, error) {
+func (act *ActivityInfo) GetActivityInfo() (int, error) {
 	if act.ID <= 0 {
 		act = nil
 		return 400, errors.New("Invalid activity id")
