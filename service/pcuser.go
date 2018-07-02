@@ -76,9 +76,6 @@ func (u *PCUser) AduitUser(message string) (int, error) {
 	}
 
 	// Send email
-	type RejectMsg struct {
-		RefuseInfo string
-	}
 	subject := "中大活动: 恭喜，您的账号注册请求被已通过"
 	if u.Verified == 2 {
 		subject = "中大活动: 很抱歉，您的账号注册请求未被通过"
@@ -144,6 +141,7 @@ func (us PCUserSlice) ListUsers(userType int) (int, error) {
 // SignUp sign up a user
 func (u PCUser) SignUp() (int, error) {
 	// TODO: verify user data
+	u.Verified = 0
 	session := GetSession()
 	defer DeleteSession(session, true)
 	affected, err := u.Insert(session)

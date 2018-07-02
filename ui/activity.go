@@ -22,6 +22,56 @@ type ActivityStatus struct {
 	OverNumber    int `json:"overNum"`
 }
 
+type ClubActivityListInformation struct {
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	PubStartTime string `json:"pubStartTime"`
+	PageViews    int    `json:"pageViews"`
+	RegisterNum  int    `json:"registerNum"`
+	Type         int    `json:"type"`
+	CanEnrolled  int    `json:"canEnrolled"`
+}
+
+type AdminActivityListInformation struct {
+	ID              int    `json:"id"`
+	Name            string `json:"name"`
+	StartTime       string `json:"startTime"`
+	EndTime         string `json:"endTime"`
+	Campus          int    `json:"campus"`
+	EnrollCondition string `json:"enrollCondition"`
+	Sponsor         string `json:"sponsor"`
+	PubStartTime    string `json:"pubStartTime"`
+	PubEndTime      string `json:"pubEndTime"`
+	Verified        int    `json:"verified"`
+	Type            int    `json:"type"`
+}
+
+// TODO: Add `json:""`
+type ActivityDetailInformation struct {
+	ID              int
+	Name            string
+	StartTime       string
+	EndTime         string
+	Location        string
+	Campus          int
+	EnrollCondition string
+	Sponsor         string
+	Type            int
+	PubStartTime    string
+	PubEndTime      string
+	Detail          string
+	EnrollWay       string
+	EnrollEndTime   string
+	Reward          string
+	Introduction    string
+	Requirement     string
+	Poster          string
+	Qrcode          string
+	CanEnrolled     int
+	Verified        int
+	Email           string
+}
+
 // AddActivityHandler add activity to the db
 func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -198,6 +248,30 @@ func ShowActivitiesListByClubHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+
+	type ClubActivityList struct {
+		Content []AdminActivityListInformation `json:"content"`
+	}
+	acts := new(service.ActivitySlice)
+	code, err := acts.GetActivityListByClud(intPageNum, intClubId)
+	if code != 200 {
+		w.WriteHeader(code)
+		return
+	}
+	layout := "2006-01-02 15:04"
+	actList := ClubActivityList{}
+	for _, v := range *acts {
+		tmp := AdminActivityListInformation{v.ID, v.Name, v.StartTime.Format(layout), v.EndTime.Format(layout), v.Campus, v.EnrollCondition, v.Sponsor,
+			v.PubStartTime.Format(layout), v.PubEndTime.Format(layout), v.Verified, v.Type}
+		actList.Content = append(actList.Content, tmp)
+	}
+	ret, err := json.Marshal(actList)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	w.Write(ret)
 }
 
 // ShowActivitiesListHandler display activity with given page number and verify status
@@ -229,6 +303,30 @@ func ShowActivitiesListHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+
+	acts := new(service.ActivitySlice)
+	code, err := acts.GetActivityListByAdmin(intPageNum, intVerified)
+	if code != 200 {
+		w.WriteHeader(code)
+		return
+	}
+	type ClubActivityList struct {
+		Content []ClubActivityListInformation `json:"content"`
+	}
+	layout := "2006-01-02 15:04"
+	actList := ClubActivityList{}
+	for _, v := range *acts {
+		tmp := ClubActivityListInformation{v.ID, v.Name, v.PubStartTime.Format(layout),
+			0, 0, v.Type, v.CanEnrolled}
+		actList.Content = append(actList.Content, tmp)
+	}
+	ret, err := json.Marshal(actList)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	w.Write(ret)
 }
 
 // ShowActivityDetailHandler return required activity details with given activity id
@@ -261,6 +359,26 @@ func ShowActivityDetailHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(401)
 		}
 	}
+
+	act := new(service.ActivityInfo)
+	act.ID = intActID
+	code, err := act.GetActivityInfo()
+	if code != 200 {
+		w.WriteHeader(code)
+	}
+	layout := "2006-01-02 15:04"
+	jsonRet := ActivityDetailInformation{act.ID, act.Name, act.StartTime.Format(layout),
+		act.EndTime.Format(layout), act.Location, act.Campus, act.EnrollCondition, act.Sponsor,
+		act.Type, act.PubStartTime.Format(layout), act.PubEndTime.Format(layout), act.Detail,
+		act.EnrollWay, act.EnrollEndTime.Format(layout), act.Reward, act.Introduction, act.Requirement,
+		act.Poster, act.Qrcode, act.CanEnrolled, act.Verified, act.Email}
+	ret, err := json.Marshal(jsonRet)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+	w.Write(ret)
 }
 
 func CloseActivityHandler(w http.ResponseWriter, r *http.Request) {
@@ -291,4 +409,9 @@ func CloseActivityHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(401)
 		}
 	}
+
+	act := new(service.ActivityInfo)
+	act.ID = intActID
+	code, err := act.CloseActivity()
+	w.WriteHeader(code)
 }
