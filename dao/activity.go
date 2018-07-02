@@ -7,66 +7,67 @@ import (
 	"github.com/go-xorm/xorm"
 )
 
-func (act *ActivityInfo) Insert(session *xorm.Session) (int) {
+func (act *ActivityInfo) Insert(session *xorm.Session) (int, error) {
 	affected, err := session.InsertOne(&act)
 	if err != nil {
 		fmt.Println(err)
-		return -1
+		return 0, err
 	}
-	return int(affected)
+	return int(affected), nil
 }
 
-func (act *ActivityInfo) Delete(session *xorm.Session) (int) {
+func (act *ActivityInfo) Delete(session *xorm.Session) (int, error) {
 	id := act.ID
 	affected, err := session.Id(id).Delete(&ActivityInfo{})
 	if err != nil {
 		fmt.Println(err)
-		return -1
+		return 0, err
 	}
-	return int(affected)
+	return int(affected), nil
 }
 
-func (act *ActivityInfo) UpdateVerifiedStatus(session *xorm.Session) (int) {
+func (act *ActivityInfo) UpdateVerifiedStatus(session *xorm.Session) (int, error) {
 	id := act.ID
 	affected, err := session.Id(id).Cols("verified").Update(act)
 	if err != nil {
 		fmt.Println(err)
-		return -1
+		return 0, err
 	}
-	return int(affected)
+	return int(affected), nil
 }
 
 // TODO: Use map to update
-func (act *ActivityInfo) Update(session *xorm.Session) (int) {
+func (act *ActivityInfo) Update(session *xorm.Session) (int, error) {
 	id := act.ID
 	affected, err := session.Id(id).Update(&act)
 	if err != nil {
 		fmt.Println(err)
-		return -1
+		return 0, err
 	}
-	return int(affected)
+	return int(affected), nil
 }
 
-func (act *ActivityInfo) UpdateEnrolled(session *xorm.Session) int {
+func (act *ActivityInfo) UpdateEnrolled(session *xorm.Session) (int, error) {
 	id := act.ID
 	affected, err := session.Where("id=?", id).Cols("can_enrolled").Update(&act)
 	if err != nil {
 		fmt.Println(err)
-		return -1
+		return 0, err
 	}
-	return int(affected)
+	return int(affected), nil
 }
 
-func (act *ActivityInfo) Get(session *xorm.Session) {
+func (act *ActivityInfo) Get(session *xorm.Session) (bool, error){
 	id := act.ID
-	_, err := session.ID(id).Get(act)
+	has, err := session.ID(id).Get(act)
 	if err != nil {
-		act = nil
 		fmt.Println(err)
+		return false, err
 	}
+	return has, nil
 }
 
-func (act *ActivityInfo) ListStatusNumByClubID(session *xorm.Session) (int, int, int) {
+func (act *ActivityInfo) ListStatusNumByClubID(session *xorm.Session) (int, int, int, error) {
 	clubId := act.PCUserID
 	activityList := make([]ActivityInfo, 0)
 	var auditNum, ongoingNum, overNum int = 0, 0, 0
@@ -75,7 +76,7 @@ func (act *ActivityInfo) ListStatusNumByClubID(session *xorm.Session) (int, int,
 	err := session.Desc("id").Where("pcuser_id = ?", clubId).Find(&activityList)
 	if err != nil {
 		fmt.Println(err)
-		return -1, -1, -1
+		return -1, -1, -1, err
 	}
 	for i := 0; i < len(activityList); i++ {
 		if activityList[i].Verified == 2 {
@@ -88,29 +89,29 @@ func (act *ActivityInfo) ListStatusNumByClubID(session *xorm.Session) (int, int,
 			overNum++
 		}
 	}
-	return auditNum, ongoingNum, overNum
+	return auditNum, ongoingNum, overNum, nil
 }
 
-func (act *ActivityInfo) ListVerifiedByClubID(session *xorm.Session, pageNum int) []ActivityInfo {
+func (act *ActivityInfo) ListVerifiedByClubID(session *xorm.Session, pageNum int) ([]ActivityInfo, error) {
 	clubId := act.PCUserID
 	activityList := make([]ActivityInfo, 0)
 	// Search clubId's activity
 	err := session.Desc("id").Where("pcuser_id = ?", clubId).And("verified = 1").Find(&activityList)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 	from := pageNum * 10
 	if from >= len(activityList) {
-		return []ActivityInfo{}
+		return []ActivityInfo{}, nil
 	}
 	if from+10 > len(activityList) {
-		return activityList[from:]
+		return activityList[from:], nil
 	}
-	return activityList[from : from+10]
+	return activityList[from : from+10], nil
 }
 
-func (act *ActivityInfo) ListByVerifiedStatus(session *xorm.Session, pageNum int) []ActivityInfo {
+func (act *ActivityInfo) ListByVerifiedStatus(session *xorm.Session, pageNum int) ([]ActivityInfo, error) {
 	verified := act.Verified
 	activityList := make([]ActivityInfo, 0)
 	// Search verified activity
@@ -120,14 +121,14 @@ func (act *ActivityInfo) ListByVerifiedStatus(session *xorm.Session, pageNum int
 	err := session.Desc("id").Where("verified = ?", verified).Find(&activityList)
 	if err != nil {
 		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 	from := pageNum * 10
 	if from >= len(activityList) {
-		return []ActivityInfo{}
+		return []ActivityInfo{}, nil
 	}
 	if from+10 > len(activityList) {
-		return activityList[from:]
+		return activityList[from:], nil
 	}
-	return activityList[from : from+10]
+	return activityList[from : from+10], nil
 }

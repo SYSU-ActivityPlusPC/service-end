@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/sysu-activitypluspc/service-end/dao"
 )
 
@@ -11,10 +13,9 @@ type ActApplyInfo struct {
 type ActApplySlice []ActApplyInfo
 
 // GetApplyList returns apply list with given id
-func (applys ActApplySlice) GetApplyList(actid int) {
+func (applys ActApplySlice) GetApplyList(actid int) (int, error) {
 	if actid <= 0 {
-		applys = nil
-		return
+		return 400, errors.New("Invalid activity id")
 	}
 
 	// Get applys from dao
@@ -22,32 +23,30 @@ func (applys ActApplySlice) GetApplyList(actid int) {
 	apply.ActId = actid
 	session := GetSession()
 	defer DeleteSession(session, true)
-	daoApplys := apply.ListByActID(session)
+	daoApplys, err := apply.ListByActID(session)
 	// Construct ActApplySlice
-	if daoApplys == nil {
-		applys = nil
+	if err == nil {
 		DeleteSession(session, false)
-		return
+		return 500, err
 	}
 	for _, v := range daoApplys {
 		tmp := ActApplyInfo{v}
 		applys = append(applys, tmp)
 	}
+	return 200, nil
 }
 
 // DeleteApply delete apply with act id and apply id
-func (apply *ActApplyInfo) DeleteApply() bool {
-	daoApply := new(dao.ActApplyInfo)
-	daoApply.ID = apply.ID
-
-	// Check if the apply matches
+func (apply *ActApplyInfo) DeleteApply() (int, error) {
 	session := GetSession()
 	defer DeleteSession(session, true)
-	daoApply.Get(session)
-	if daoApply == nil || daoApply.ID < 0 || daoApply.ActId != apply.ActId {
-		apply = nil
-		return false
+	affected, err := apply.Delete(session)
+	if err != nil {
+		DeleteSession(session, false)
+		return 500, err
 	}
-	// Delete apply
-	return daoApply.Delete(session)
+	if affected == 0 {
+		return 204, nil
+	}
+	return 200, nil
 }

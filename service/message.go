@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/sysu-activitypluspc/service-end/dao"
 )
 
@@ -12,65 +13,76 @@ type Message struct {
 type MessageSlice []Message
 
 // PublishMessage publish a message
-func (msg *Message) PublishMessage() bool {
+func (msg *Message) PublishMessage() (int, error) {
 	session := GetSession()
 	defer DeleteSession(session, true)
 	affected, err := msg.Message.Insert(session)
 	if err != nil {
 		DeleteSession(session, false)
-		return false
+		return 500, err
 	}
-	affected = msg.MessagePCUser.Insert(session)
-	if affected == -1 {
+	affected, err = msg.MessagePCUser.Insert(session)
+	if err != nil {
 		DeleteSession(session, false)
-		return false
+		return 500, err
 	}
-	return true
+	if affected == 0 {
+		return 204, nil
+	}
+	return 200, err
 }
 
 // ListMessages list messages with given page
-func (msgs MessageSlice) ListMessages(page int) {
+func (msgs MessageSlice) ListMessages(page int) (int, error){
 	msg := new(dao.Message)
 	session := GetSession()
 	defer DeleteSession(session, true)
-	daoMsgs := msg.List(session, page)
-	if daoMsgs == nil {
-		msgs = nil
-		return
+	daoMsgs, err := msg.List(session, page)
+	if err != nil {
+		return 500, err
 	}
 	for _, v := range daoMsgs {
 		tmp := Message{}
 		tmp.Message = v
 		msgs = append(msgs, tmp)
 	}
+	if len(msgs) == 0 {
+		return 204, nil
+	}
+	return 200, nil
 }
 
 // GetMessageInformation returns message information with given message id
-func (msg *Message) GetMessageInformation() {
+func (msg *Message) GetMessageInformation() (int, error){
 	if msg.Message.ID <= 0 {
-		msg = nil
-		return
+		return 400, errors.New("Invalid message id")
 	}
 	session := GetSession()
 	defer DeleteSession(session, true)
-	err := msg.Get(session)
+	has, err := msg.Get(session)
 	if err != nil {
-		msg = nil
+		return 500, err
 	}
+	if !has {
+		return 204, nil
+	}
+	return 200, nil
 }
 
 // DeleteMessage delete message with id
-func (msg *Message) DeleteMessage() bool {
+func (msg *Message) DeleteMessage() (int, error) {
 	if msg.Message.ID <= 0 {
-		msg = nil
-		return false
+		return 400, errors.New("Invalid message id")
 	}
 	session := GetSession()
 	defer DeleteSession(session, true)
-	_, err := msg.Delete(session)
+	affected, err := msg.Delete(session)
 	if err != nil {
 		DeleteSession(session, false)
-		return false
+		return 500, err
 	}
-	return true
+	if affected == 0 {
+		return 204, nil
+	}
+	return 200, nil
 }

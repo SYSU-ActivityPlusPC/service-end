@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/sysu-activitypluspc/service-end/dao"
 )
 
@@ -12,149 +14,174 @@ type ActivityInfo struct {
 type ActivitySlice []ActivityInfo
 
 // AddActivity add activity
-// 0 - already exist
-// 1 - finish
-// 2 - fail
-func (act *ActivityInfo) AddActivity() int {
+func (act *ActivityInfo) AddActivity() (int, error) {
 	// TODO: Check data in activity
-	daoAct := act.ActivityInfo
 	session := GetSession()
 	defer DeleteSession(session, true)
-	affected := daoAct.Insert(session)
-	if affected == -1 {
+	affected, err := act.Insert(session)
+	if err != nil {
 		DeleteSession(session, false)
-		return 2
+		return 500, err
 	}
 	if affected == 0 {
-		return 0
+		return 204, nil
 	}
-	return 1
+	return 200, nil
 }
 
 // GetActivityNumber receives club id, returns different status' number
 // with order: audit, ongoing, over
-func (act *ActivityInfo) GetActivityNumber(clubID int) (bool, []int) {
+func (act *ActivityInfo) GetActivityNumber() ([]int, error) {
 	session := GetSession()
 	defer DeleteSession(session, true)
-	a, b, c := act.ActivityInfo.ListStatusNumByClubID(session)
-	if a == -1 {
-		return false, []int{a, b, c}
+	a, b, c, err := act.ActivityInfo.ListStatusNumByClubID(session)
+	if err != nil {
+		return []int{a, b, c}, err
 	}
-	return true, []int{a, b, c}
+	return []int{a, b, c}, nil
 }
 
 // GetActivityListByClud for club
-func (acts ActivitySlice) GetActivityListByClud(page int, clubid int) {
+func (acts ActivitySlice) GetActivityListByClud(page int, clubid int) (int, error) {
 	act := new(dao.ActivityInfo)
 	act.PCUserID = clubid
 	session := GetSession()
 	defer DeleteSession(session, true)
-	daoActs := act.ListVerifiedByClubID(session, page)
-	if daoActs == nil {
-		acts = nil
-		return
+	daoActs, err := act.ListVerifiedByClubID(session, page)
+	if err != nil {
+		return 500, err
 	}
 	for _, v := range daoActs {
 		tmp := ActivityInfo{v}
 		acts = append(acts, tmp)
 	}
+	if len(acts) == 0 {
+		return 204, nil
+	}
+	return 200, nil
 }
 
 // GetActivityListByadmin for administrator
-func (acts ActivitySlice) GetActivityListByAdmin(page int, verified int) {
+func (acts ActivitySlice) GetActivityListByAdmin(page int, verified int) (int, error) {
 	act := new(dao.ActivityInfo)
 	act.Verified = verified
 	session := GetSession()
 	defer DeleteSession(session, true)
-	daoActs := act.ListByVerifiedStatus(session, page)
-	if daoActs == nil {
-		acts = nil
-		return
+	daoActs, err := act.ListByVerifiedStatus(session, page)
+	if err != nil {
+		return 500, err
 	}
 	for _, v := range daoActs {
 		tmp := ActivityInfo{v}
 		acts = append(acts, tmp)
 	}
+	if len(acts) == 0 {
+		return 204, nil
+	}
+	return 200, nil
 }
 
 // GetActivityInfor returns activity info with the given id
-func (act *ActivityInfo) GetActivityInfo(id int) {
+func (act *ActivityInfo) GetActivityInfo() (int, error) {
 	if act.ID <= 0 {
 		act = nil
-		return
+		return 400, errors.New("Invalid activity id")
 	}
 	session := GetSession()
 	defer DeleteSession(session, true)
-	act.Get(session)
+	has, err := act.Get(session)
+	if err != nil {
+		return 500, err
+	}
+	if !has {
+		return 204, nil
+	}
+	return 200, nil
 }
 
 // ModifyActivity update activity information with id
-func (act *ActivityInfo) ModifyActivity() bool {
+func (act *ActivityInfo) ModifyActivity() (int, error) {
 	if act.ID <= 0 {
 		act = nil
-		return false
+		return 400, errors.New("Invalid activity id")
 	}
 	session := GetSession()
 	defer DeleteSession(session, true)
-	affected := act.Update(session)
-	if affected == -1 {
-		act = nil
+	_, err := act.Update(session)
+	if err != nil {
 		DeleteSession(session, false)
-		return false
+		return 500, err
 	}
-	return true
+	return 200, nil
 }
 
 // DeleteActivity delete activity with id
 // 0 - error
 // 1 - ok
 // 2 - no content
-func (act *ActivityInfo) DeleteActivity() int {
+func (act *ActivityInfo) DeleteActivity() (int, error) {
 	if act.ID <= 0 {
-		act = nil
-		return 0
+		return 400, errors.New("Invalid activity id")
 	}
 	session := GetSession()
 	defer DeleteSession(session, true)
-	affected := act.Delete(session)
-	if affected == -1 {
-		act = nil
+	affected, err := act.Delete(session)
+	if err != nil {
 		DeleteSession(session, false)
-		return 0
+		return 500, err
 	}
 	if affected == 0 {
-		return 2
+		return 204, nil
 	}
-	return 1
+	return 200, nil
 }
 
 // AduitActivity aduit activity with id
-func (act *ActivityInfo) AduitActivity() bool {
+func (act *ActivityInfo) AduitActivity() (int, error) {
 	if act.ID <= 0 {
-		act = nil
-		return false
+		return 400, errors.New("Invalid activity id")
 	}
 	session := GetSession()
 	defer DeleteSession(session, true)
-	affected := act.UpdateVerifiedStatus(session)
-	if affected == -1 {
+	_, err := act.UpdateVerifiedStatus(session)
+	if err != nil {
 		DeleteSession(session, false)
-		return false
+		return 500, err
 	}
-	return true
+	return 200, nil
 }
 
 // CloseActivity close activity with id
-func (act *ActivityInfo) CloseActivity() bool {
+func (act *ActivityInfo) CloseActivity() (int, error) {
 	if act.ID <= 0 {
-		act = nil
-		return false
+		return 400, errors.New("Invalid activity id")
 	}
 	session := GetSession()
 	defer DeleteSession(session, true)
-	affected := act.UpdateEnrolled(session)
-	if affected == -1 {
-		return false
+	affected, err := act.UpdateEnrolled(session)
+	if err != nil {
+		return 500, err
 	}
-	return true
+	if affected == 0 {
+		return 204, nil
+	}
+	return 200, nil
+}
+
+// Is act published by account
+func (act *ActivityInfo) CheckMessageCorrectness() (bool, error) {
+	userid := act.PCUserID
+	session := GetSession()
+	defer DeleteSession(session, true)
+	has, err := act.Get(session)
+	if err != nil {
+		return false, err
+	}
+	if !has {
+		return false, nil
+	}
+	if userid != act.PCUserID {
+		return false, nil
+	}
+	return true, nil
 }

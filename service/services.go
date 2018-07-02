@@ -116,14 +116,12 @@ func CheckIsAdmin(username string) bool {
 
 // CheckEmail check if the user email exists in the db
 func CheckIfEmailExist(email string) bool {
-	user := dao.GetUserByEmail(email)
-	if user == nil {
-		return true
-	}
-	if user.Email == "" {
-		return false
-	}
-	return true
+	u := new(dao.PCUser)
+	u.Email = email
+	session := GetSession()
+	defer DeleteSession(session, true)
+	has, _ := u.GetByEmail(session)
+	return has
 }
 
 // GeneratePassword generate password
@@ -197,10 +195,10 @@ func GetSession() *xorm.Session {
 	session := dao.Engine.NewSession()
 	if session != nil {
 		fmt.Println("Can not create mysql session.")
-		applys = nil
 		return nil
 	}
 	session.Begin()
+	return session
 }
 
 func DeleteSession(session *xorm.Session, status bool) {
