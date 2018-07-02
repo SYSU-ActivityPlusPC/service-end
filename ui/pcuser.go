@@ -12,6 +12,14 @@ import (
 	"github.com/sysu-activitypluspc/service-end/types"
 )
 
+type PCUser struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Logo     string `json:"Logo"`
+	Evidence string `json:"evidence"`
+	Info     string `json:"info"`
+}
+
 func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	body, err := ioutil.ReadAll(r.Body)
