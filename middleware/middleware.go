@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 	
-	"github.com/sysu-activitypluspc/service-end/controller"
+	"github.com/sysu-activitypluspc/service-end/services"
 	"github.com/sysu-activitypluspc/service-end/model"
 )
 
@@ -39,7 +39,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 	if len(auth) <= 0 {
 		r.Header.Set("X-Role", "0")
 	} else {
-		ok, name := controller.CheckToken(auth)
+		ok, name := services.CheckToken(auth)
 		if ok != 2 {
 			r.Header.Set("X-Role", "0")
 		} else {
@@ -49,7 +49,7 @@ func (v ValidUserMiddleWare) ServeHTTP(rw http.ResponseWriter, r *http.Request, 
 				r.Header.Set("X-Role", "0")
 				userId = -1
 			} else {
-				isAdmin := controller.CheckIsAdmin(name)
+				isAdmin := services.CheckIsAdmin(name)
 				userId = user.ID
 				if isAdmin {
 					role = 2

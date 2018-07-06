@@ -1,4 +1,4 @@
-package controller
+package services
 
 import (
 	"crypto/md5"
@@ -92,7 +92,7 @@ func GenerateJWT(account string) (string, error) {
 	return tokenString, err
 }
 
-func getPassword(id string, raw string) string {
+func GetPassword(id string, raw string) string {
 	key := strings.Join([]string{raw, raw, id}, "@")
 	return GetMd5([]byte(key))
 }
