@@ -10,7 +10,7 @@ import (
 func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
 	var maxMemory int64 = 5 * (1 << 20)
 	r.ParseMultipartForm(maxMemory)
-	file, handler, err := r.FormFile("file")
+	file, _, err := r.FormFile("file")
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(400)

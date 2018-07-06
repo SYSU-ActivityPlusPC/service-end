@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/sysu-activitypluspc/service-end/types"
+	"github.com/sysu-activitypluspc/service-end/service"
 )
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +20,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		username := r.Header.Get("X-Account")
 		// Handle role 1 and 2
 		if IntRole == 1 || IntRole == 2 {
-			user := dao.GetUserInfo(username)
+			user := new(service.PCUser)
+			user.Account = username
+			code, err := user.GetUserInformation()
+
 			res := types.PCUserInfo{
 				ID:    user.ID,
 				Name:  user.Name,

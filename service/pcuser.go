@@ -31,6 +31,20 @@ func (u *PCUser) GetUserInformation() (int, error) {
 	return 200, nil
 }
 
+// GetUserInformation returns user information with account
+func (u *PCUser) GetUserInfoByAccount() (int, error) {
+	session := GetSession()
+	defer DeleteSession(session, true)
+	has, err := u.GetByAccount(session)
+	if err != nil {
+		return 500, err
+	}
+	if !has {
+		return 204, nil
+	}
+	return 200, nil
+}
+
 // AduitUser aduit user with id and verified status
 func (u *PCUser) AduitUser(message string) (int, error) {
 	if u.Verified != 1 && u.Verified != 2 {

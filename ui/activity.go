@@ -101,7 +101,7 @@ func AddActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 // ModifyActivityHandler change the message except id and verified
 func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	role, id, _, _ := GetHeaderMessage(r)
 	actid := mux.Vars(r)["actId"]
 	intActID, err := strconv.Atoi(actid)
 	if err != nil {
@@ -147,7 +147,7 @@ func ModifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 // DeleteActivityHandler remove activity with given id
 func DeleteActivityHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	role, _, _, _ := GetHeaderMessage(r)
 	if role != 2 {
 		w.WriteHeader(401)
 		return
@@ -167,7 +167,7 @@ func DeleteActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 // VerifyActivityHandler change the verify status of an activity
 func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	role, _, _, _ := GetHeaderMessage(r)
 	if role != 2 {
 		w.WriteHeader(401)
 		return
@@ -190,7 +190,7 @@ func VerifyActivityHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetNumberOfActStatusByClubHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	_, id, _, _ := GetHeaderMessage(r)
 	clubId := mux.Vars(r)["clubId"]
 	intClubId, err := strconv.Atoi(clubId)
 	if err != nil {
@@ -222,7 +222,7 @@ func GetNumberOfActStatusByClubHandler(w http.ResponseWriter, r *http.Request) {
 
 // ShowActivitiesListByClubHandler display activity with given page number, only club use
 func ShowActivitiesListByClubHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	_, id, _, _ := GetHeaderMessage(r)
 	clubId := mux.Vars(r)["clubId"]
 	intClubId, err := strconv.Atoi(clubId)
 	if err != nil {
@@ -276,7 +276,7 @@ func ShowActivitiesListByClubHandler(w http.ResponseWriter, r *http.Request) {
 
 // ShowActivitiesListHandler display activity with given page number and verify status
 func ShowActivitiesListHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	role, _, _, _ := GetHeaderMessage(r)
 	if role != 2 {
 		w.WriteHeader(401)
 		return
@@ -331,7 +331,7 @@ func ShowActivitiesListHandler(w http.ResponseWriter, r *http.Request) {
 
 // ShowActivityDetailHandler return required activity details with given activity id
 func ShowActivityDetailHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	role, id, _, _ := GetHeaderMessage(r)
 	vars := mux.Vars(r)
 	actid := vars["id"]
 	intActID, err := strconv.Atoi(actid)
@@ -382,7 +382,7 @@ func ShowActivityDetailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CloseActivityHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	role, id, _, _ := GetHeaderMessage(r)
 	actid := mux.Vars(r)["actid"]
 	intActID, err := strconv.Atoi(actid)
 	if err != nil {

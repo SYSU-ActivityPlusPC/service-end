@@ -22,7 +22,7 @@ type ActApplyListResponse struct {
 }
 
 func ListActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	role, id, _, _ := GetHeaderMessage(r)
 	r.ParseForm()
 	actid := r.FormValue("act")
 
@@ -73,7 +73,7 @@ func ListActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
-	role, id, account, _ := GetHeaderMessage(r)
+	role, id, _, _ := GetHeaderMessage(r)
 	r.ParseForm()
 	actid := r.FormValue("act")
 	applyid := r.FormValue("actApply")
@@ -112,6 +112,6 @@ func DeleteActivityApplyHandler(w http.ResponseWriter, r *http.Request) {
 	apply := new(service.ActApplyInfo)
 	apply.ID = intApplyID
 	apply.ActId = intActID
-	code, res := apply.DeleteApply()
+	code, _ := apply.DeleteApply()
 	w.WriteHeader(code)
 }
