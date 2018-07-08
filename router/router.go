@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"github.com/sysu-activitypluspc/service-end/controller"
 	"github.com/sysu-activitypluspc/service-end/middleware"
 	"github.com/urfave/negroni"
@@ -9,10 +10,14 @@ import (
 
 func GetServer() *negroni.Negroni {
 	r := mux.NewRouter()
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+	})
 
 	s := negroni.Classic()
+	s.Use(c)
 	s.Use(middleware.ValidUserMiddleWare{})
-	
 
 	act := r.PathPrefix("/act").Subrouter()
 	act.HandleFunc("", controller.AddActivityHandler).Methods("POST")
@@ -39,13 +44,12 @@ func GetServer() *negroni.Negroni {
 	message.HandleFunc("", controller.ShowMessagesListHandler).Methods("GET")
 	message.HandleFunc("/{id}", controller.ShowMessageDetailHandler).Methods("GET")
 	message.HandleFunc("/{id}", controller.DeleteMessageHandler).Methods("DELETE")
-	
+
 	r.HandleFunc("/images", controller.UploadImageHandler).Methods("POST")
 
 	actApply := r.PathPrefix("/actApply").Subrouter()
 	actApply.HandleFunc("", controller.ListActivityApplyHandler).Methods("GET")
 	actApply.HandleFunc("", controller.DeleteActivityApplyHandler).Methods("DELETE")
-	
 
 	s.UseHandler(r)
 	return s
